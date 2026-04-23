@@ -1,0 +1,23 @@
+{
+  "name": "el-dokkan",
+  "version": "1.0.0",
+  "description": "El Dokkan - Online Store with Vercel Web Analytics",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parrotarab-stack/El-Dokkan.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/parrotarab-stack/El-Dokkan/issues"
+  },
+  "homepage": "https://github.com/parrotarab-stack/El-Dokkan#readme",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
