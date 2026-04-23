@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>الدكان | El Dokkan - متجرك الإلكتروني</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #1e293b;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+
+        .logo p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .admin-link a {
+            background: #f59e0b;
+            color: #1e293b;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .admin-link a:hover {
+            background: #d97706;
+            transform: scale(1.05);
+        }
+
+        .controls {
+            padding: 1.5rem 2rem;
+            background: white;
+            margin: 1rem 2rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .controls input {
+            flex: 2;
+            min-width: 200px;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .controls input:focus {
+            border-color: #f59e0b;
+        }
+
+        .products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.8rem;
+            padding: 1rem 2rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid #eef2ff;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+            border-color: #f59e0b;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+            color: #0f172a;
+        }
+
+        .product-price {
+            color: #f59e0b;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .product-short-desc {
+            font-size: 0.8rem;
+            color: #475569;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .badge {
+            background: #e2e8f0;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            font-size: 1.3rem;
+            color: #64748b;
+            grid-column: 1 / -1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: #0f172a;
+            color: #94a3b8;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 640px) {
+            .products-container {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .controls {
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <h1>الدكان 🛍️</h1>
+        <p>El Dokkan | Online Store</p>
+    </div>
+    <div class="admin-link">
+        <a href="admin.html">📦 لوحة التحكم</a>
+    </div>
+</div>
+
+<div class="controls">
+    <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج... (اسم أو مواصفات)">
+</div>
+
+<div class="products-container" id="productsContainer">
+    <div class="empty-state">جاري تحميل المنتجات...</div>
+</div>
+
+<footer>
+    الدكان - جميع الحقوق محفوظة © 2025 | تواصل معنا واتساب: 01000621448
+</footer>
+
+<script>
+    const STORAGE_KEY = 'el_dokkan_products';
+
+    function loadProducts() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        } else {
+            const defaultProducts = [
+                {
+                    id: "prod1",
+                    name: "سماعات لاسلكية Pro",
+                    price: "450",
+                    shortDesc: "عزل ضوضاء، بطارية 20 ساعة",
+                    mainImage: "https://picsum.photos/id/1/300/200",
+                    images: ["https://picsum.photos/id/1/400/300", "https://picsum.photos/id/26/400/300"],
+                    specs: {
+                        "اللون": "أسود",
+                        "الموديل": "XB-100",
+                        "الضمان": "سنة"
+                    },
+                    extraFields: []
+                },
+                {
+                    id: "prod2",
+                    name: "ساعة رياضية ذكية",
+                    price: "850",
+                    shortDesc: "شاشة 1.8 بوصة، مقاومة ماء",
+                    mainImage: "https://picsum.photos/id/20/300/200",
+                    images: ["https://picsum.photos/id/20/400/300", "https://picsum.photos/id/82/400/300"],
+                    specs: {
+                        "اللون": "رمادي",
+                        "نظام التشغيل": "RTOS",
+                        "الشحن": "مagnetic"
+                    },
+                    extraFields: []
+                },
+                {
+                    id: "prod3",
+                    name: "حقيبة ظهر عصرية",
+                    price: "320",
+                    shortDesc: "مضادة للماء، 15 بوصة لابتوب",
+                    mainImage: "https://picsum.photos/id/100/300/200",
+                    images: ["https://picsum.photos/id/100/400/300", "https://picsum.photos/id/24/400/300"],
+                    specs: {
+                        "الخامة": "نايلون",
+                        "ألوان": "أسود، أزرق"
+                    },
+                    extraFields: []
+                }
+            ];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProducts));
+            return defaultProducts;
+        }
+    }
+
+    let allProducts = loadProducts();
+
+    function renderProducts(productsArray) {
+        const container = document.getElementById('productsContainer');
+        if (!productsArray.length) {
+            container.innerHTML = '<div class="empty-state">😢 لا توجد منتجات حالياً - أضف منتجات من لوحة التحكم</div>';
+            return;
+        }
+
+        container.innerHTML = productsArray.map(product => `
+            <div class="product-card" onclick="viewProduct('${product.id}')">
+                <img class="product-img" src="${product.mainImage}" alt="${product.name}" onerror="this.src='https://picsum.photos/id/1/300/200'">
+                <div class="product-info">
+                    <div class="product-title">${product.name}</div>
+                    <div class="product-price">${product.price} ج.م</div>
+                    <div class="product-short-desc">${product.shortDesc}</div>
+                    <div class="badge">🛒 اضغط للمزيد</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterProducts() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allProducts.filter(p => 
+            p.name.toLowerCase().includes(searchTerm) || 
+            p.shortDesc.toLowerCase().includes(searchTerm) ||
+            JSON.stringify(p.specs).toLowerCase().includes(searchTerm)
+        );
+        renderProducts(filtered);
+    }
+
+    window.viewProduct = function(productId) {
+        window.location.href = `product.html?id=${productId}`;
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderProducts(allProducts);
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterProducts);
+        }
+    });
+
+    window.refreshProductsList = function() {
+        allProducts = loadProducts();
+        renderProducts(allProducts);
+    };
+</script>
+</body>
+</html>
