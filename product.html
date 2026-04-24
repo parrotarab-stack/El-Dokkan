@@ -174,7 +174,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const PHONE = "01000621448";
+    const PHONE = "201000621448";
 
     function getProductById(productId, callback) {
         database.ref('products/' + productId).once('value', (snapshot) => {
