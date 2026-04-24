@@ -158,6 +158,13 @@
             grid-column: 1 / -1;
         }
 
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            font-size: 1.2rem;
+            color: #f59e0b;
+        }
+
         footer {
             text-align: center;
             padding: 2rem;
@@ -176,6 +183,9 @@
             }
         }
     </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -194,85 +204,60 @@
 </div>
 
 <div class="products-container" id="productsContainer">
-    <div class="empty-state">جاري تحميل المنتجات...</div>
+    <div class="loading">✨ جاري تحميل المنتجات من السحابة...</div>
 </div>
 
 <footer>
-    الدكان - جميع الحقوق محفوظة © 2026 | تواصل معنا واتساب: 01000621448
+    الدكان - جميع الحقوق محفوظة © 2025 | تواصل معنا واتساب: 01000621448
 </footer>
 
 <script>
-    const STORAGE_KEY = 'el_dokkan_products';
+    // ========== إعدادات Firebase - استبدلها ببياناتك ==========
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-    function loadProducts() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            return JSON.parse(stored);
-        } else {
-            const defaultProducts = [
-                {
-                    id: "prod1",
-                    name: "سماعات لاسلكية Pro",
-                    price: "450",
-                    shortDesc: "عزل ضوضاء، بطارية 20 ساعة",
-                    mainImage: "https://picsum.photos/id/1/300/200",
-                    images: ["https://picsum.photos/id/1/400/300", "https://picsum.photos/id/26/400/300"],
-                    specs: {
-                        "اللون": "أسود",
-                        "الموديل": "XB-100",
-                        "الضمان": "سنة"
-                    },
-                    extraFields: []
-                },
-                {
-                    id: "prod2",
-                    name: "ساعة رياضية ذكية",
-                    price: "850",
-                    shortDesc: "شاشة 1.8 بوصة، مقاومة ماء",
-                    mainImage: "https://picsum.photos/id/20/300/200",
-                    images: ["https://picsum.photos/id/20/400/300", "https://picsum.photos/id/82/400/300"],
-                    specs: {
-                        "اللون": "رمادي",
-                        "نظام التشغيل": "RTOS",
-                        "الشحن": "مagnetic"
-                    },
-                    extraFields: []
-                },
-                {
-                    id: "prod3",
-                    name: "حقيبة ظهر عصرية",
-                    price: "320",
-                    shortDesc: "مضادة للماء، 15 بوصة لابتوب",
-                    mainImage: "https://picsum.photos/id/100/300/200",
-                    images: ["https://picsum.photos/id/100/400/300", "https://picsum.photos/id/24/400/300"],
-                    specs: {
-                        "الخامة": "نايلون",
-                        "ألوان": "أسود، أزرق"
-                    },
-                    extraFields: []
-                }
-            ];
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProducts));
-            return defaultProducts;
-        }
-    }
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
+  authDomain: "el-dokkan-abc4e.firebaseapp.com",
+  databaseURL: "https://el-dokkan-abc4e-default-rtdb.firebaseio.com",
+  projectId: "el-dokkan-abc4e",
+  storageBucket: "el-dokkan-abc4e.firebasestorage.app",
+  messagingSenderId: "720051498127",
+  appId: "1:720051498127:web:eb3d90666c76fb718494fa",
+  measurementId: "G-05LN632QHN"
+};
 
-    let allProducts = loadProducts();
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+    // ===========================================================
+
+    // تهيئة Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const productsRef = database.ref('products');
+
+    let allProducts = [];
 
     function renderProducts(productsArray) {
         const container = document.getElementById('productsContainer');
-        if (!productsArray.length) {
+        if (!productsArray || productsArray.length === 0) {
             container.innerHTML = '<div class="empty-state">😢 لا توجد منتجات حالياً - أضف منتجات من لوحة التحكم</div>';
             return;
         }
 
         container.innerHTML = productsArray.map(product => `
             <div class="product-card" onclick="viewProduct('${product.id}')">
-                <img class="product-img" src="${product.mainImage}" alt="${product.name}" onerror="this.src='https://picsum.photos/id/1/300/200'">
+                <img class="product-img" src="${product.mainImage || 'https://picsum.photos/id/1/300/200'}" alt="${product.name}" onerror="this.src='https://picsum.photos/id/1/300/200'">
                 <div class="product-info">
                     <div class="product-title">${product.name}</div>
                     <div class="product-price">${product.price} ج.م</div>
-                    <div class="product-short-desc">${product.shortDesc}</div>
+                    <div class="product-short-desc">${product.shortDesc || ''}</div>
                     <div class="badge">🛒 اضغط للمزيد</div>
                 </div>
             </div>
@@ -283,8 +268,8 @@
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const filtered = allProducts.filter(p => 
             p.name.toLowerCase().includes(searchTerm) || 
-            p.shortDesc.toLowerCase().includes(searchTerm) ||
-            JSON.stringify(p.specs).toLowerCase().includes(searchTerm)
+            (p.shortDesc && p.shortDesc.toLowerCase().includes(searchTerm)) ||
+            JSON.stringify(p.specs || {}).toLowerCase().includes(searchTerm)
         );
         renderProducts(filtered);
     }
@@ -293,18 +278,30 @@
         window.location.href = `product.html?id=${productId}`;
     };
 
+    // تحميل المنتجات من Firebase في الوقت الفعلي (Real-time)
+    function loadProductsFromFirebase() {
+        productsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                allProducts = Object.values(data);
+                renderProducts(allProducts);
+            } else {
+                allProducts = [];
+                renderProducts([]);
+            }
+        }, (error) => {
+            console.error(error);
+            document.getElementById('productsContainer').innerHTML = '<div class="empty-state">❌ خطأ في الاتصال بقاعدة البيانات</div>';
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-        renderProducts(allProducts);
+        loadProductsFromFirebase();
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('input', filterProducts);
         }
     });
-
-    window.refreshProductsList = function() {
-        allProducts = loadProducts();
-        renderProducts(allProducts);
-    };
 </script>
 </body>
 </html>
