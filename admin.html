@@ -46,6 +46,10 @@
             background: #64748b;
             color: white;
         }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
         .form-card {
             background: white;
             border-radius: 28px;
@@ -138,6 +142,14 @@
             color: #64748b;
             margin-top: 0.25rem;
         }
+        .sync-status {
+            background: #e0f2fe;
+            padding: 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
         @media (max-width: 700px) {
             th, td {
                 font-size: 0.8rem;
@@ -145,6 +157,9 @@
             }
         }
     </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -183,6 +198,10 @@
         </div>
     </div>
 
+    <div class="sync-status" id="syncStatus">
+        ☁️ متصل بالسحابة - التغييرات تظهر فوراً على كل الأجهزة
+    </div>
+
     <div class="form-card">
         <h3 id="formTitle">➕ إضافة منتج جديد</h3>
         <input type="hidden" id="editId" value="">
@@ -203,19 +222,21 @@
         </div>
         
         <div class="form-group">
-            <label>🖼️ الصورة الرئيسية *</label>
+            <label>🖼️ الصورة الرئيسية * (رابط URL أو اختر ملف)</label>
             <input type="file" id="mainImageFile" accept="image/*" onchange="previewMainImage(this)">
+            <input type="text" id="mainImageUrl" placeholder="أو اكتب رابط الصورة هنا" style="margin-top:0.5rem;">
             <div class="image-preview" id="mainImagePreview"></div>
             <input type="hidden" id="mainImageData" value="">
-            <div class="help-text">⭐ اختر صورة من جهازك (يفضل أن تكون مربعة الشكل)</div>
+            <div class="help-text">⭐ اختر صورة من جهازك (ستتحول لنص) أو استخدم رابط من الإنترنت</div>
         </div>
         
         <div class="form-group">
-            <label>🖼️ صور إضافية للمنتج (اختر عدة صور)</label>
+            <label>🖼️ صور إضافية للمنتج (روابط أو ملفات)</label>
             <input type="file" id="extraImagesFiles" accept="image/*" multiple onchange="previewExtraImages(this)">
+            <input type="text" id="extraImagesUrls" placeholder="أو اكتب روابط الصور مفصولة بفاصلة" style="margin-top:0.5rem;">
             <div class="image-preview" id="extraImagesPreview"></div>
             <input type="hidden" id="extraImagesData" value="">
-            <div class="help-text">⭐ يمكنك اختيار أكثر من صورة (اضغط Ctrl لاختيار عدة صور)</div>
+            <div class="help-text">⭐ يمكنك اختيار عدة صور من جهازك أو كتابة روابطها</div>
         </div>
         
         <div class="form-group">
@@ -241,11 +262,16 @@
         </div>
 
         <button class="btn" onclick="saveProduct()">💾 حفظ المنتج</button>
-        <button class="btn-secondary" onclick="resetForm()" style="background:#64748b;">🔄 إلغاء / جديد</button>
+        <button class="btn-secondary" onclick="resetForm()">🔄 إلغاء / جديد</button>
     </div>
 
     <div class="products-table">
         <h3>📋 المنتجات الحالية</h3>
+        <div style="margin-bottom: 1rem;">
+            <button class="btn-success" onclick="exportData()">📤 تصدير المنتجات (نسخة احتياطية)</button>
+            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(this)">
+            <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 استيراد منتجات</button>
+        </div>
         <table id="productsTable">
             <thead>
                 <tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>المواصفات</th><th>إجراءات</th></tr>
@@ -256,42 +282,36 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'el_dokkan_products';
-    let currentMainImagePreview = null;
-    let currentExtraImagesPreviews = [];
+    // ========== إعدادات Firebase - استبدلها ببياناتك ==========
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-    function getProducts() {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    }
-    
-    function saveProductsToStorage(products) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-        renderProductTable();
-    }
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
+  authDomain: "el-dokkan-abc4e.firebaseapp.com",
+  databaseURL: "https://el-dokkan-abc4e-default-rtdb.firebaseio.com",
+  projectId: "el-dokkan-abc4e",
+  storageBucket: "el-dokkan-abc4e.firebasestorage.app",
+  messagingSenderId: "720051498127",
+  appId: "1:720051498127:web:eb3d90666c76fb718494fa",
+  measurementId: "G-05LN632QHN"
+};
 
-    function renderProductTable() {
-        const products = getProducts();
-        const tbody = document.getElementById('tableBody');
-        if(!products.length) {
-            tbody.innerHTML = '<td><td colspan="5" style="text-align:center">لا توجد منتجات. أضف منتجك الأول!</td></tr>';
-            return;
-        }
-        tbody.innerHTML = products.map(prod => {
-            let specsShort = Object.entries(prod.specs || {}).map(([k,v])=>`${k}:${v}`).join(', ') || '-';
-            return `
-                <tr>
-                    <td><img class="small-img" src="${prod.mainImage}" onerror="this.src='https://picsum.photos/id/1/50/50'"></td>
-                    <td>${prod.name}</td>
-                    <td>${prod.price} ج.م</td>
-                    <td>${specsShort.substring(0,50)}</td>
-                    <td class="product-actions">
-                        <button class="edit-btn" onclick="editProduct('${prod.id}')">✏️ تعديل</button>
-                        <button class="delete-btn" onclick="deleteProduct('${prod.id}')">🗑️ حذف</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+    // ===========================================================
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const productsRef = database.ref('products');
+
+    let allProducts = {};
 
     // تحويل الصورة إلى نص Base64
     function fileToBase64(file) {
@@ -303,21 +323,17 @@
         });
     }
 
-    // معاينة الصورة الرئيسية
     async function previewMainImage(input) {
         const previewDiv = document.getElementById('mainImagePreview');
         if (input.files && input.files[0]) {
             const file = input.files[0];
             const base64 = await fileToBase64(file);
             document.getElementById('mainImageData').value = base64;
+            document.getElementById('mainImageUrl').value = '';
             previewDiv.innerHTML = `<img src="${base64}" alt="الصورة الرئيسية">`;
-        } else {
-            previewDiv.innerHTML = '';
-            document.getElementById('mainImageData').value = '';
         }
     }
 
-    // معاينة الصور الإضافية
     async function previewExtraImages(input) {
         const previewDiv = document.getElementById('extraImagesPreview');
         const files = Array.from(input.files);
@@ -330,6 +346,7 @@
             previewDiv.innerHTML += `<img src="${base64}" alt="صورة إضافية">`;
         }
         document.getElementById('extraImagesData').value = JSON.stringify(base64Array);
+        document.getElementById('extraImagesUrls').value = '';
     }
 
     function collectSpecs() {
@@ -361,13 +378,29 @@
         const shortDesc = document.getElementById('shortDesc').value.trim();
         
         let mainImage = document.getElementById('mainImageData').value;
+        const mainImageUrl = document.getElementById('mainImageUrl').value.trim();
+        if (mainImageUrl && !mainImage) {
+            mainImage = mainImageUrl;
+        }
+        
         if (!mainImage && !id) {
-            alert('يرجى اختيار صورة رئيسية للمنتج');
+            alert('يرجى إضافة صورة رئيسية (اختيار ملف أو كتابة رابط)');
             return;
         }
         
         let extraImagesData = document.getElementById('extraImagesData').value;
-        let imagesArray = extraImagesData ? JSON.parse(extraImagesData) : [];
+        let extraImagesUrls = document.getElementById('extraImagesUrls').value.trim();
+        let imagesArray = [];
+        
+        if (extraImagesData) {
+            imagesArray = JSON.parse(extraImagesData);
+        } else if (extraImagesUrls) {
+            imagesArray = extraImagesUrls.split(',').map(s => s.trim());
+        }
+        
+        if (mainImage && !imagesArray.includes(mainImage)) {
+            imagesArray.unshift(mainImage);
+        }
         
         const specs = collectSpecs();
         const extraFields = collectExtraFields();
@@ -377,68 +410,82 @@
             return;
         }
 
-        const products = getProducts();
-        
-        if(id) {
-            const index = products.findIndex(p => p.id === id);
-            if(index !== -1) {
-                // لو ما غيرش الصورة الرئيسية، خلي القديمة
-                if (!mainImage && products[index].mainImage) {
-                    mainImage = products[index].mainImage;
-                }
-                // لو ما غيرش الصور الإضافية، خلي القديمة
-                if (imagesArray.length === 0 && products[index].images) {
-                    imagesArray = products[index].images;
-                }
-                products[index] = {
-                    ...products[index],
-                    name, price, shortDesc, mainImage,
-                    images: imagesArray,
-                    specs: specs,
-                    extraFields: extraFields
-                };
-                saveProductsToStorage(products);
-                alert('تم التعديل بنجاح');
-            }
+        const productData = {
+            name, price, shortDesc, mainImage,
+            images: imagesArray,
+            specs: specs,
+            extraFields: extraFields
+        };
+
+        if (id) {
+            await productsRef.child(id).update(productData);
+            alert('تم التعديل بنجاح 🎉');
         } else {
             const newId = Date.now().toString();
-            const newProduct = {
-                id: newId,
-                name, price, shortDesc, mainImage,
-                images: imagesArray,
-                specs: specs,
-                extraFields: extraFields
-            };
-            products.push(newProduct);
-            saveProductsToStorage(products);
-            alert('تمت إضافة المنتج');
+            await productsRef.child(newId).set(productData);
+            alert('تمت إضافة المنتج 🎉');
         }
         resetForm();
-        renderProductTable();
     }
 
-    function editProduct(id) {
-        const products = getProducts();
-        const prod = products.find(p => p.id === id);
+    function renderProductTable() {
+        const tbody = document.getElementById('tableBody');
+        const productsArray = Object.values(allProducts);
+        if(!productsArray.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">لا توجد منتجات. أضف منتجك الأول!</td></td>';
+            return;
+        }
+        tbody.innerHTML = productsArray.map(prod => {
+            let specsShort = Object.entries(prod.specs || {}).map(([k,v])=>`${k}:${v}`).join(', ') || '-';
+            return `
+                <tr>
+                    <td><img class="small-img" src="${prod.mainImage}" onerror="this.src='https://picsum.photos/id/1/50/50'"></td>
+                    <td>${prod.name}</td>
+                    <td>${prod.price} ج.م</td>
+                    <td>${specsShort.substring(0,50)}</td>
+                    <td class="product-actions">
+                        <button class="edit-btn" onclick="editProduct('${prod.id}')">✏️ تعديل</button>
+                        <button class="delete-btn" onclick="deleteProduct('${prod.id}')">🗑️ حذف</button>
+                     </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function listenToProducts() {
+        productsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                allProducts = data;
+                renderProductTable();
+            } else {
+                allProducts = {};
+                renderProductTable();
+            }
+        });
+    }
+
+    async function editProduct(id) {
+        const snapshot = await productsRef.child(id).once('value');
+        const prod = snapshot.val();
         if(!prod) return;
         
-        document.getElementById('editId').value = prod.id;
+        document.getElementById('editId').value = id;
         document.getElementById('prodName').value = prod.name;
         document.getElementById('prodPrice').value = prod.price;
         document.getElementById('shortDesc').value = prod.shortDesc || '';
         
-        // عرض الصورة الرئيسية الحالية
-        if(prod.mainImage) {
-            document.getElementById('mainImagePreview').innerHTML = `<img src="${prod.mainImage}" alt="الصورة الرئيسية">`;
-            document.getElementById('mainImageData').value = prod.mainImage;
-        }
+        document.getElementById('mainImagePreview').innerHTML = `<img src="${prod.mainImage}" alt="الصورة الرئيسية">`;
+        document.getElementById('mainImageData').value = prod.mainImage;
+        document.getElementById('mainImageUrl').value = '';
         
-        // عرض الصور الإضافية الحالية
         if(prod.images && prod.images.length) {
             let imgsHtml = '';
-            prod.images.forEach(img => { imgsHtml += `<img src="${img}" alt="صورة إضافية">`; });
+            prod.images.forEach(img => { 
+                if (img !== prod.mainImage) imgsHtml += `<img src="${img}" alt="صورة إضافية">`; 
+            });
             document.getElementById('extraImagesPreview').innerHTML = imgsHtml;
-            document.getElementById('extraImagesData').value = JSON.stringify(prod.images);
+            document.getElementById('extraImagesData').value = JSON.stringify(prod.images.filter(img => img !== prod.mainImage));
         }
         
         document.getElementById('specsContainer').innerHTML = `<div class="spec-row"><input placeholder="المفتاح" class="specKey" style="flex:1;"><input placeholder="القيمة" class="specValue" style="flex:1;"><button type="button" onclick="addSpecRow()" style="background:#4ade80; padding:0.5rem 1rem;">+</button></div>`;
@@ -453,13 +500,9 @@
         document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
     }
 
-    function deleteProduct(id) {
+    async function deleteProduct(id) {
         if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-            let products = getProducts();
-            products = products.filter(p => p.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-            renderProductTable();
-            resetForm();
+            await productsRef.child(id).remove();
             alert('تم الحذف');
         }
     }
@@ -470,14 +513,47 @@
         document.getElementById('prodPrice').value = '';
         document.getElementById('shortDesc').value = '';
         document.getElementById('mainImageFile').value = '';
+        document.getElementById('mainImageUrl').value = '';
         document.getElementById('mainImagePreview').innerHTML = '';
         document.getElementById('mainImageData').value = '';
         document.getElementById('extraImagesFiles').value = '';
+        document.getElementById('extraImagesUrls').value = '';
         document.getElementById('extraImagesPreview').innerHTML = '';
         document.getElementById('extraImagesData').value = '';
         document.getElementById('specsContainer').innerHTML = `<div class="spec-row"><input placeholder="المفتاح" class="specKey" style="flex:1;"><input placeholder="القيمة" class="specValue" style="flex:1;"><button type="button" onclick="addSpecRow()" style="background:#4ade80; padding:0.5rem 1rem;">+</button></div>`;
         document.getElementById('extraContainer').innerHTML = `<div class="extra-row"><input placeholder="اسم الحقل" class="extraName" style="flex:1;"><input placeholder="قيمة الحقل" class="extraVal" style="flex:1;"><button type="button" onclick="addExtraRow()" style="background:#a78bfa; padding:0.5rem 1rem;">+</button></div>`;
         document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
+    }
+
+    function exportData() {
+        const products = JSON.stringify(allProducts);
+        const blob = new Blob([products], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'el_dokkan_backup.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        alert('تم تصدير المنتجات بنجاح!');
+    }
+
+    async function importData(fileInput) {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const products = JSON.parse(e.target.result);
+                for (const [id, product] of Object.entries(products)) {
+                    await productsRef.child(id).set(product);
+                }
+                alert('تم استيراد المنتجات بنجاح!');
+                resetForm();
+            } catch(err) {
+                alert('ملف غير صالح');
+            }
+        };
+        reader.readAsText(file);
     }
 
     window.addSpecRow = function(keyVal='', valVal='') {
@@ -525,7 +601,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        renderProductTable();
+        listenToProducts();
     });
 </script>
 </body>
