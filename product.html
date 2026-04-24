@@ -125,6 +125,12 @@
             background: #128C7E;
             transform: scale(1.01);
         }
+        .loading-detail {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: #f59e0b;
+        }
         @media (max-width: 700px) {
             .gallery {
                 flex-direction: column;
@@ -138,6 +144,9 @@
             }
         }
     </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
 <div class="navbar">
@@ -146,16 +155,43 @@
 </div>
 
 <div class="product-detail" id="productDetail">
-    <div style="text-align: center;">جاري تحميل المنتج...</div>
+    <div class="loading-detail">📦 جاري تحميل المنتج...</div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'el_dokkan_products';
+    // ========== إعدادات Firebase - استبدلها ببياناتك ==========
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
+  authDomain: "el-dokkan-abc4e.firebaseapp.com",
+  databaseURL: "https://el-dokkan-abc4e-default-rtdb.firebaseio.com",
+  projectId: "el-dokkan-abc4e",
+  storageBucket: "el-dokkan-abc4e.firebasestorage.app",
+  messagingSenderId: "720051498127",
+  appId: "1:720051498127:web:eb3d90666c76fb718494fa",
+  measurementId: "G-05LN632QHN"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+    // ===========================================================
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
     const PHONE = "01000621448";
 
-    function getProductById(id) {
-        const products = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        return products.find(p => p.id === id);
+    function getProductById(productId, callback) {
+        database.ref('products/' + productId).once('value', (snapshot) => {
+            callback(snapshot.val());
+        });
     }
 
     function renderProductPage() {
@@ -165,53 +201,57 @@
             document.getElementById('productDetail').innerHTML = '<div style="padding:2rem; text-align:center;">❌ لم يتم تحديد المنتج</div>';
             return;
         }
-        const product = getProductById(productId);
-        if (!product) {
-            document.getElementById('productDetail').innerHTML = '<div style="padding:2rem; text-align:center;">❌ المنتج غير موجود</div>';
-            return;
-        }
 
-        let specsHtml = '';
-        for (const [key, value] of Object.entries(product.specs)) {
-            specsHtml += `<div class="spec-item"><div class="spec-key">${key}:</div><div>${value}</div></div>`;
-        }
+        getProductById(productId, (product) => {
+            if (!product) {
+                document.getElementById('productDetail').innerHTML = '<div style="padding:2rem; text-align:center;">❌ المنتج غير موجود</div>';
+                return;
+            }
 
-        let extraHtml = '';
-        if (product.extraFields && product.extraFields.length) {
-            extraHtml = `<div class="extra-fields"><h3>📌 معلومات إضافية</h3>`;
-            product.extraFields.forEach(field => {
-                extraHtml += `<div class="spec-item"><div class="spec-key">${field.fieldName}:</div><div>${field.fieldValue}</div></div>`;
-            });
-            extraHtml += `</div>`;
-        }
+            let specsHtml = '';
+            if (product.specs) {
+                for (const [key, value] of Object.entries(product.specs)) {
+                    specsHtml += `<div class="spec-item"><div class="spec-key">${key}:</div><div>${value}</div></div>`;
+                }
+            }
 
-        const imagesList = product.images && product.images.length ? product.images : [product.mainImage];
-        let thumbsHtml = imagesList.map(img => `<img src="${img}" onclick="changeMainImage(this.src)" alt="thumb">`).join('');
+            let extraHtml = '';
+            if (product.extraFields && product.extraFields.length) {
+                extraHtml = `<div class="extra-fields"><h3>📌 معلومات إضافية</h3>`;
+                product.extraFields.forEach(field => {
+                    extraHtml += `<div class="spec-item"><div class="spec-key">${field.fieldName}:</div><div>${field.fieldValue}</div></div>`;
+                });
+                extraHtml += `</div>`;
+            }
 
-        const fullHtml = `
-            <div class="gallery">
-                <div class="main-img">
-                    <img id="mainProductImage" src="${product.mainImage}" alt="${product.name}">
+            const imagesList = product.images && product.images.length ? product.images : [product.mainImage];
+            let thumbsHtml = imagesList.map(img => `<img src="${img}" onclick="changeMainImage(this.src)" alt="thumb">`).join('');
+
+            const fullHtml = `
+                <div class="gallery">
+                    <div class="main-img">
+                        <img id="mainProductImage" src="${product.mainImage}" alt="${product.name}">
+                    </div>
+                    <div class="thumb-list">
+                        ${thumbsHtml}
+                    </div>
                 </div>
-                <div class="thumb-list">
-                    ${thumbsHtml}
+                <h1 class="product-title">${product.name}</h1>
+                <div class="price">💰 ${product.price} جنيه مصري</div>
+                <div class="short-desc">
+                    📝 ${product.shortDesc || 'لا يوجد وصف إضافي'}
                 </div>
-            </div>
-            <h1 class="product-title">${product.name}</h1>
-            <div class="price">💰 ${product.price} جنيه مصري</div>
-            <div class="short-desc">
-                📝 ${product.shortDesc || 'لا يوجد وصف إضافي'}
-            </div>
-            <div class="specs">
-                <h3>⚙️ المواصفات الأساسية</h3>
-                ${specsHtml || '<p>لا توجد مواصفات مسجلة</p>'}
-            </div>
-            ${extraHtml}
-            <button class="whatsapp-btn" onclick="sendToWhatsApp('${product.name.replace(/'/g, "\\'")}', '${product.price}')">
-                📲 شراء المنتج عبر واتساب
-            </button>
-        `;
-        document.getElementById('productDetail').innerHTML = fullHtml;
+                <div class="specs">
+                    <h3>⚙️ المواصفات الأساسية</h3>
+                    ${specsHtml || '<p>لا توجد مواصفات مسجلة</p>'}
+                </div>
+                ${extraHtml}
+                <button class="whatsapp-btn" onclick="sendToWhatsApp('${product.name.replace(/'/g, "\\'")}', '${product.price}')">
+                    📲 شراء المنتج عبر واتساب
+                </button>
+            `;
+            document.getElementById('productDetail').innerHTML = fullHtml;
+        });
     }
 
     window.changeMainImage = function(src) {
