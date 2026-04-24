@@ -158,8 +158,8 @@
         }
     </style>
     <!-- Firebase SDK -->
-    <script src="https://el-dokkan-abc4e-default-rtdb.firebaseio.com/"></script>
-    <script src="https://el-dokkan-abc4e-default-rtdb.firebaseio.com/"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -227,7 +227,7 @@
             <input type="text" id="mainImageUrl" placeholder="أو اكتب رابط الصورة هنا" style="margin-top:0.5rem;">
             <div class="image-preview" id="mainImagePreview"></div>
             <input type="hidden" id="mainImageData" value="">
-            <div class="help-text">⭐ اختر صورة من جهازك (ستتحول لنص) أو استخدم رابط من الإنترنت</div>
+            <div class="help-text">⭐ اختر صورة من جهازك أو استخدم رابط من الإنترنت</div>
         </div>
         
         <div class="form-group">
@@ -282,30 +282,18 @@
 </div>
 
 <script>
-    // ========== إعدادات Firebase - استبدلها ببياناتك ==========
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
-  authDomain: "el-dokkan-abc4e.firebaseapp.com",
-  databaseURL: "https://el-dokkan-abc4e-default-rtdb.firebaseio.com",
-  projectId: "el-dokkan-abc4e",
-  storageBucket: "el-dokkan-abc4e.firebasestorage.app",
-  messagingSenderId: "720051498127",
-  appId: "1:720051498127:web:eb3d90666c76fb718494fa",
-  measurementId: "G-05LN632QHN"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-    // ===========================================================
+    // ========== إعدادات Firebase - بياناتك أنت ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
+        authDomain: "el-dokkan-abc4e.firebaseapp.com",
+        databaseURL: "https://el-dokkan-abc4e-default-rtdb.firebaseio.com",
+        projectId: "el-dokkan-abc4e",
+        storageBucket: "el-dokkan-abc4e.firebasestorage.app",
+        messagingSenderId: "720051498127",
+        appId: "1:720051498127:web:eb3d90666c76fb718494fa",
+        measurementId: "G-05LN632QHN"
+    };
+    // =================================================
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
@@ -313,7 +301,6 @@ const analytics = getAnalytics(app);
 
     let allProducts = {};
 
-    // تحويل الصورة إلى نص Base64
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -411,28 +398,35 @@ const analytics = getAnalytics(app);
         }
 
         const productData = {
+            id: id || Date.now().toString(),
             name, price, shortDesc, mainImage,
             images: imagesArray,
             specs: specs,
             extraFields: extraFields
         };
 
-        if (id) {
-            await productsRef.child(id).update(productData);
-            alert('تم التعديل بنجاح 🎉');
-        } else {
-            const newId = Date.now().toString();
-            await productsRef.child(newId).set(productData);
-            alert('تمت إضافة المنتج 🎉');
+        try {
+            if (id) {
+                await productsRef.child(id).update(productData);
+                alert('✅ تم التعديل بنجاح!');
+            } else {
+                const newId = Date.now().toString();
+                productData.id = newId;
+                await productsRef.child(newId).set(productData);
+                alert('✅ تمت إضافة المنتج بنجاح!');
+            }
+            resetForm();
+        } catch(error) {
+            console.error(error);
+            alert('❌ خطأ في الحفظ: ' + error.message);
         }
-        resetForm();
     }
 
     function renderProductTable() {
         const tbody = document.getElementById('tableBody');
         const productsArray = Object.values(allProducts);
         if(!productsArray.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">لا توجد منتجات. أضف منتجك الأول!</td></td>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">لا توجد منتجات. أضف منتجك الأول!</td></tr>';
             return;
         }
         tbody.innerHTML = productsArray.map(prod => {
@@ -446,7 +440,7 @@ const analytics = getAnalytics(app);
                     <td class="product-actions">
                         <button class="edit-btn" onclick="editProduct('${prod.id}')">✏️ تعديل</button>
                         <button class="delete-btn" onclick="deleteProduct('${prod.id}')">🗑️ حذف</button>
-                     </td>
+                    </td>
                 </tr>
             `;
         }).join('');
@@ -503,7 +497,7 @@ const analytics = getAnalytics(app);
     async function deleteProduct(id) {
         if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
             await productsRef.child(id).remove();
-            alert('تم الحذف');
+            alert('✅ تم الحذف');
         }
     }
 
@@ -534,7 +528,7 @@ const analytics = getAnalytics(app);
         a.download = 'el_dokkan_backup.json';
         a.click();
         URL.revokeObjectURL(url);
-        alert('تم تصدير المنتجات بنجاح!');
+        alert('✅ تم تصدير المنتجات بنجاح!');
     }
 
     async function importData(fileInput) {
@@ -547,10 +541,10 @@ const analytics = getAnalytics(app);
                 for (const [id, product] of Object.entries(products)) {
                     await productsRef.child(id).set(product);
                 }
-                alert('تم استيراد المنتجات بنجاح!');
+                alert('✅ تم استيراد المنتجات بنجاح!');
                 resetForm();
             } catch(err) {
-                alert('ملف غير صالح');
+                alert('❌ ملف غير صالح');
             }
         };
         reader.readAsText(file);
