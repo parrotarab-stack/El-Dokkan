@@ -5,146 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تفاصيل المنتج - الدكان</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        body {
-            background: #f8fafc;
-        }
-        .navbar {
-            background: #0f172a;
-            padding: 1rem 2rem;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .back-link a {
-            color: #f59e0b;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .product-detail {
-            max-width: 1100px;
-            margin: 2rem auto;
-            background: white;
-            border-radius: 32px;
-            padding: 2rem;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.05);
-        }
-        .gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .main-img {
-            flex: 2;
-            min-width: 250px;
-        }
-        .main-img img {
-            width: 100%;
-            border-radius: 24px;
-            object-fit: cover;
-            max-height: 400px;
-        }
-        .thumb-list {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-        .thumb-list img {
-            width: 100%;
-            border-radius: 16px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: 0.2s;
-        }
-        .thumb-list img:hover {
-            border-color: #f59e0b;
-        }
-        .product-title {
-            font-size: 2rem;
-            margin: 1rem 0 0.5rem;
-        }
-        .price {
-            font-size: 2rem;
-            color: #e67e22;
-            font-weight: bold;
-            margin: 1rem 0;
-        }
-        .short-desc {
-            margin-bottom: 1rem;
-            background: #fef9e3;
-            padding: 1rem;
-            border-radius: 20px;
-        }
-        .specs {
-            background: #f1f5f9;
-            padding: 1.5rem;
-            border-radius: 24px;
-            margin: 1.5rem 0;
-        }
-        .specs h3, .extra-fields h3 {
-            margin-bottom: 1rem;
-            color: #1e293b;
-        }
-        .spec-item {
-            display: flex;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e2e8f0;
-            flex-wrap: wrap;
-        }
-        .spec-key {
-            width: 130px;
-            font-weight: bold;
-        }
-        .whatsapp-btn {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
-            border-radius: 60px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            margin-top: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: 0.2s;
-        }
-        .whatsapp-btn:hover {
-            background: #128C7E;
-            transform: scale(1.01);
-        }
-        .loading-detail {
-            text-align: center;
-            padding: 3rem;
-            font-size: 1.2rem;
-            color: #f59e0b;
-        }
-        @media (max-width: 700px) {
-            .gallery {
-                flex-direction: column;
-            }
-            .thumb-list {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            .thumb-list img {
-                width: 80px;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f8fafc; }
+        .navbar { background: #0f172a; padding: 1rem 2rem; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .back-link a { color: #f59e0b; text-decoration: none; font-weight: bold; }
+        .product-detail { max-width: 1100px; margin: 2rem auto; background: white; border-radius: 32px; padding: 2rem; box-shadow: 0 20px 35px rgba(0,0,0,0.05); }
+        .gallery { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+        .main-img { flex: 2; min-width: 250px; }
+        .main-img img { width: 100%; border-radius: 24px; object-fit: cover; max-height: 400px; }
+        .thumb-list { flex: 1; display: flex; flex-direction: column; gap: 0.8rem; }
+        .thumb-list img { width: 100%; border-radius: 16px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .thumb-list img:hover { border-color: #f59e0b; }
+        .product-title { font-size: 2rem; margin: 1rem 0 0.5rem; }
+        .price { font-size: 2rem; color: #e67e22; font-weight: bold; margin: 1rem 0; }
+        .short-desc { margin-bottom: 1rem; background: #fef9e3; padding: 1rem; border-radius: 20px; }
+        .specs { background: #f1f5f9; padding: 1.5rem; border-radius: 24px; margin: 1.5rem 0; }
+        .specs h3, .extra-fields h3 { margin-bottom: 1rem; color: #1e293b; }
+        .spec-item { display: flex; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+        .spec-key { width: 130px; font-weight: bold; }
+        .whatsapp-btn { background: #25D366; color: white; border: none; padding: 1rem 2rem; font-size: 1.2rem; border-radius: 60px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        .whatsapp-btn:hover { background: #128C7E; transform: scale(1.01); }
+        .loading-detail { text-align: center; padding: 3rem; font-size: 1.2rem; color: #f59e0b; }
+        @media (max-width: 700px) { .gallery { flex-direction: column; } .thumb-list { flex-direction: row; flex-wrap: wrap; } .thumb-list img { width: 80px; } }
     </style>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
@@ -159,7 +42,6 @@
 </div>
 
 <script>
-    // ========== إعدادات Firebase - بياناتك أنت ==========
     const firebaseConfig = {
         apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
         authDomain: "el-dokkan-abc4e.firebaseapp.com",
@@ -167,19 +49,15 @@
         projectId: "el-dokkan-abc4e",
         storageBucket: "el-dokkan-abc4e.firebasestorage.app",
         messagingSenderId: "720051498127",
-        appId: "1:720051498127:web:eb3d90666c76fb718494fa",
-        measurementId: "G-05LN632QHN"
+        appId: "1:720051498127:web:eb3d90666c76fb718494fa"
     };
-    // =================================================
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const PHONE = "201000621448";
 
     function getProductById(productId, callback) {
-        database.ref('products/' + productId).once('value', (snapshot) => {
-            callback(snapshot.val());
-        });
+        database.ref('products/' + productId).once('value', (snapshot) => callback(snapshot.val()));
     }
 
     function renderProductPage() {
@@ -226,13 +104,8 @@
                 </div>
                 <h1 class="product-title">${product.name}</h1>
                 <div class="price">💰 ${product.price} جنيه مصري</div>
-                <div class="short-desc">
-                    📝 ${product.shortDesc || 'لا يوجد وصف إضافي'}
-                </div>
-                <div class="specs">
-                    <h3>⚙️ المواصفات الأساسية</h3>
-                    ${specsHtml || '<p>لا توجد مواصفات مسجلة</p>'}
-                </div>
+                <div class="short-desc">📝 ${product.shortDesc || 'لا يوجد وصف إضافي'}</div>
+                <div class="specs"><h3>⚙️ المواصفات الأساسية</h3>${specsHtml || '<p>لا توجد مواصفات مسجلة</p>'}</div>
                 ${extraHtml}
                 <button class="whatsapp-btn" onclick="sendToWhatsApp('${product.name.replace(/'/g, "\\'")}', '${product.price}')">
                     📲 شراء المنتج عبر واتساب
@@ -242,16 +115,11 @@
         });
     }
 
-    window.changeMainImage = function(src) {
-        document.getElementById('mainProductImage').src = src;
-    };
-
+    window.changeMainImage = function(src) { document.getElementById('mainProductImage').src = src; };
     window.sendToWhatsApp = function(productName, price) {
         const message = `مرحباً، أرغب في شراء المنتج: ${productName} بسعر ${price} جنيه. يرجى التواصل لتأكيد التوصيل والدفع عند الاستلام.`;
-        const encodedMsg = encodeURIComponent(message);
-        window.open(`https://wa.me/${PHONE}?text=${encodedMsg}`, '_blank');
+        window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(message)}`, '_blank');
     };
-
     document.addEventListener('DOMContentLoaded', renderProductPage);
 </script>
 </body>
