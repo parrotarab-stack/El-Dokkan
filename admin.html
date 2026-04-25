@@ -5,297 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - الدكان</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        body {
-            background: #eef2ff;
-            padding: 1rem;
-        }
-        .admin-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .header {
-            background: #0f172a;
-            color: white;
-            padding: 1rem;
-            border-radius: 30px;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .btn {
-            background: #f59e0b;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        .btn-secondary {
-            background: #64748b;
-            color: white;
-        }
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-        .form-card {
-            background: white;
-            border-radius: 28px;
-            padding: 1.8rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 6px;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 0.7rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 20px;
-        }
-        input[type="file"] {
-            padding: 0.5rem;
-            background: #f8fafc;
-        }
-        .image-preview {
-            margin-top: 0.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .image-preview img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-        }
-        .spec-row, .extra-row {
-            display: flex;
-            gap: 0.7rem;
-            margin-bottom: 0.7rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .products-table {
-            background: white;
-            border-radius: 28px;
-            overflow-x: auto;
-            padding: 1rem;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            text-align: right;
-            padding: 0.8rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .product-actions button {
-            margin: 0 3px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-        }
-        .edit-btn { background: #3b82f6; color: white; }
-        .delete-btn { background: #ef4444; color: white; }
-        .small-img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 12px;
-        }
-        h2, h3 {
-            margin-bottom: 1rem;
-        }
-        .logout-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 0.4rem 1rem;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-        .help-text {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-top: 0.25rem;
-        }
-        .sync-status {
-            background: #e0f2fe;
-            padding: 0.5rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-        .upload-progress {
-            background: #e2e8f0;
-            border-radius: 20px;
-            height: 6px;
-            margin-top: 0.5rem;
-            display: none;
-        }
-        .upload-progress-bar {
-            background: #f59e0b;
-            border-radius: 20px;
-            height: 6px;
-            width: 0%;
-        }
-        @media (max-width: 700px) {
-            th, td {
-                font-size: 0.8rem;
-                padding: 0.4rem;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #eef2ff; padding: 1rem; }
+        .admin-container { max-width: 1400px; margin: 0 auto; }
+        .header { background: #0f172a; color: white; padding: 1rem; border-radius: 30px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .btn { background: #f59e0b; border: none; padding: 0.5rem 1.2rem; border-radius: 40px; cursor: pointer; font-weight: bold; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-secondary { background: #64748b; color: white; }
+        .form-card { background: white; border-radius: 28px; padding: 1.8rem; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 1rem; }
+        label { font-weight: bold; display: block; margin-bottom: 6px; }
+        input, textarea { width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 20px; }
+        .spec-row, .extra-row { display: flex; gap: 0.7rem; margin-bottom: 0.7rem; align-items: center; flex-wrap: wrap; }
+        .products-table { background: white; border-radius: 28px; overflow-x: auto; padding: 1rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: right; padding: 0.8rem; border-bottom: 1px solid #e2e8f0; }
+        .edit-btn { background: #3b82f6; color: white; border: none; padding: 4px 10px; border-radius: 20px; cursor: pointer; margin: 0 3px; }
+        .delete-btn { background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 20px; cursor: pointer; }
+        .small-img { width: 50px; height: 50px; object-fit: cover; border-radius: 12px; }
+        .logout-btn { background: #dc2626; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
+        .help-text { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; }
+        @media (max-width: 700px) { th, td { font-size: 0.8rem; padding: 0.4rem; } }
     </style>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
 <body>
 
-<!-- ========== حماية لوحة التحكم ========== -->
 <script>
     const ADMIN_USERNAME = "admin";
     const ADMIN_PASSWORD = "dokkan2025";
-    
     (function checkAuth() {
-        let auth = sessionStorage.getItem('adminAuth');
-        if (!auth) {
+        if (!sessionStorage.getItem('adminAuth')) {
             let user = prompt("🔐 اسم المستخدم:");
             let pass = prompt("🔑 كلمة المرور:");
             if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
                 sessionStorage.setItem('adminAuth', 'true');
             } else {
-                alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة!");
+                alert("❌ بيانات غير صحيحة!");
                 window.location.href = "index.html";
             }
         }
     })();
-
-    function logout() {
-        sessionStorage.removeItem('adminAuth');
-        location.reload();
-    }
+    function logout() { sessionStorage.removeItem('adminAuth'); location.reload(); }
 </script>
-<!-- ===================================== -->
 
 <div class="admin-container">
     <div class="header">
         <h2>⚙️ لوحة تحكم الدكان</h2>
-        <div>
-            <button onclick="logout()" class="logout-btn">🚪 تسجيل الخروج</button>
-            <a href="index.html" style="color:white; margin-right:1rem;">← عرض المتجر</a>
-        </div>
-    </div>
-
-    <div class="sync-status" id="syncStatus">
-        ☁️ متصل بالسحابة - الصور ترفع على Firebase Storage
+        <div><button onclick="logout()" class="logout-btn">🚪 تسجيل الخروج</button> <a href="index.html" style="color:white;">← عرض المتجر</a></div>
     </div>
 
     <div class="form-card">
         <h3 id="formTitle">➕ إضافة منتج جديد</h3>
-        <input type="hidden" id="editId" value="">
-        
-        <div class="form-group">
-            <label>اسم المنتج *</label>
-            <input type="text" id="prodName" placeholder="مثال: سماعات بلوتوث">
-        </div>
-        
-        <div class="form-group">
-            <label>السعر (جنيه) *</label>
-            <input type="number" id="prodPrice" placeholder="السعر">
-        </div>
-        
-        <div class="form-group">
-            <label>وصف مختصر (يظهر في البطاقة)</label>
-            <input type="text" id="shortDesc" placeholder="وصف صغير للمنتج">
-        </div>
-        
-        <div class="form-group">
-            <label>🖼️ الصورة الرئيسية *</label>
-            <input type="file" id="mainImageFile" accept="image/*" onchange="previewMainImage(this)">
-            <div class="image-preview" id="mainImagePreview"></div>
-            <div class="upload-progress" id="mainUploadProgress">
-                <div class="upload-progress-bar" id="mainProgressBar"></div>
-            </div>
-            <div class="help-text">⭐ اختر صورة من جهازك - سيتم رفعها تلقائياً على Firebase Storage</div>
-        </div>
-        
-        <div class="form-group">
-            <label>🖼️ صور إضافية للمنتج (اختر عدة صور)</label>
-            <input type="file" id="extraImagesFiles" accept="image/*" multiple onchange="previewExtraImages(this)">
-            <div class="image-preview" id="extraImagesPreview"></div>
-            <div class="help-text">⭐ يمكنك اختيار أكثر من صورة - سيتم رفعها على Firebase Storage</div>
-        </div>
-        
-        <div class="form-group">
-            <label>🏷️ المواصفات الأساسية (مفتاح: قيمة)</label>
-            <div id="specsContainer">
-                <div class="spec-row">
-                    <input placeholder="المفتاح" class="specKey" style="flex:1;">
-                    <input placeholder="القيمة" class="specValue" style="flex:1;">
-                    <button type="button" onclick="addSpecRow()" style="background:#4ade80; padding:0.5rem 1rem; border-radius:20px;">+</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>✨ خانات إضافية مستقبلية</label>
-            <div id="extraContainer">
-                <div class="extra-row">
-                    <input placeholder="اسم الحقل (مثل: الوزن)" class="extraName" style="flex:1;">
-                    <input placeholder="قيمة الحقل" class="extraVal" style="flex:1;">
-                    <button type="button" onclick="addExtraRow()" style="background:#a78bfa; padding:0.5rem 1rem; border-radius:20px;">+</button>
-                </div>
-            </div>
-        </div>
-
+        <input type="hidden" id="editId">
+        <div class="form-group"><label>اسم المنتج *</label><input type="text" id="prodName" placeholder="مثال: سماعات بلوتوث"></div>
+        <div class="form-group"><label>السعر (جنيه) *</label><input type="number" id="prodPrice" placeholder="السعر"></div>
+        <div class="form-group"><label>وصف مختصر</label><input type="text" id="shortDesc" placeholder="وصف صغير للمنتج"></div>
+        <div class="form-group"><label>🖼️ رابط الصورة الرئيسية *</label><input type="text" id="mainImage" placeholder="https://i.ibb.co/xxxxx/image.jpg"><div class="help-text">⭐ ارفع الصورة على ImgBB وانسخ الرابط المباشر</div></div>
+        <div class="form-group"><label>🖼️ روابط صور إضافية (مفصولة بفاصلة)</label><input type="text" id="extraImages" placeholder="رابط1, رابط2, رابط3"></div>
+        <div class="form-group"><label>🏷️ المواصفات</label><div id="specsContainer"><div class="spec-row"><input placeholder="المفتاح" class="specKey" style="flex:1;"><input placeholder="القيمة" class="specValue" style="flex:1;"><button type="button" onclick="addSpecRow()" style="background:#4ade80;">+</button></div></div></div>
+        <div class="form-group"><label>✨ خانات إضافية</label><div id="extraContainer"><div class="extra-row"><input placeholder="اسم الحقل" class="extraName" style="flex:1;"><input placeholder="قيمة الحقل" class="extraVal" style="flex:1;"><button type="button" onclick="addExtraRow()" style="background:#a78bfa;">+</button></div></div></div>
         <button class="btn" onclick="saveProduct()">💾 حفظ المنتج</button>
-        <button class="btn-secondary" onclick="resetForm()">🔄 إلغاء / جديد</button>
+        <button class="btn-secondary" onclick="resetForm()">🔄 إلغاء</button>
     </div>
 
     <div class="products-table">
         <h3>📋 المنتجات الحالية</h3>
-        <div style="margin-bottom: 1rem;">
-            <button class="btn-success" onclick="exportData()">📤 تصدير المنتجات (نسخة احتياطية)</button>
-            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(this)">
-            <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 استيراد منتجات</button>
-        </div>
-        <table id="productsTable">
-            <thead>
-                <tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>المواصفات</th><th>إجراءات</th></tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
+        <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>المواصفات</th><th>إجراءات</th></tr></thead><tbody id="tableBody"></tbody></table>
     </div>
 </div>
 
 <script>
-    // ========== إعدادات Firebase - بياناتك أنت ==========
     const firebaseConfig = {
         apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
         authDomain: "el-dokkan-abc4e.firebaseapp.com",
@@ -303,355 +84,46 @@
         projectId: "el-dokkan-abc4e",
         storageBucket: "el-dokkan-abc4e.firebasestorage.app",
         messagingSenderId: "720051498127",
-        appId: "1:720051498127:web:eb3d90666c76fb718494fa",
-        measurementId: "G-05LN632QHN"
+        appId: "1:720051498127:web:eb3d90666c76fb718494fa"
     };
-    // =================================================
-
-    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const storage = firebase.storage();
     const productsRef = database.ref('products');
-
     let allProducts = {};
-    let currentMainImageFile = null;
-    let currentExtraImagesFiles = [];
 
-    // معاينة الصورة الرئيسية
-    function previewMainImage(input) {
-        const previewDiv = document.getElementById('mainImagePreview');
-        if (input.files && input.files[0]) {
-            currentMainImageFile = input.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewDiv.innerHTML = `<img src="${e.target.result}" alt="الصورة الرئيسية">`;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    // معاينة الصور الإضافية
-    function previewExtraImages(input) {
-        const previewDiv = document.getElementById('extraImagesPreview');
-        currentExtraImagesFiles = Array.from(input.files);
-        previewDiv.innerHTML = '';
-        currentExtraImagesFiles.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewDiv.innerHTML += `<img src="${e.target.result}" alt="صورة إضافية">`;
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // رفع صورة إلى Firebase Storage
-    async function uploadImage(file, path) {
-        return new Promise((resolve, reject) => {
-            const storageRef = storage.ref(path);
-            const uploadTask = storageRef.put(file);
-            
-            uploadTask.on('state_changed', 
-                (snapshot) => {
-                    // Progress
-                },
-                (error) => {
-                    reject(error);
-                },
-                async () => {
-                    const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-                    resolve(downloadURL);
-                }
-            );
-        });
-    }
-
-    function collectSpecs() {
-        let specs = {};
-        const rows = document.querySelectorAll('#specsContainer .spec-row');
-        rows.forEach(row => {
-            let key = row.querySelector('.specKey')?.value.trim();
-            let val = row.querySelector('.specValue')?.value.trim();
-            if(key && val) specs[key] = val;
-        });
-        return specs;
-    }
-
-    function collectExtraFields() {
-        let extra = [];
-        const rows = document.querySelectorAll('#extraContainer .extra-row');
-        rows.forEach(row => {
-            let fieldName = row.querySelector('.extraName')?.value.trim();
-            let fieldVal = row.querySelector('.extraVal')?.value.trim();
-            if(fieldName && fieldVal) extra.push({ fieldName, fieldValue: fieldVal });
-        });
-        return extra;
-    }
-
-    async function saveProduct() {
+    function saveProduct() {
         let id = document.getElementById('editId').value;
         const name = document.getElementById('prodName').value.trim();
         const price = document.getElementById('prodPrice').value.trim();
         const shortDesc = document.getElementById('shortDesc').value.trim();
-        
-        if(!name || !price) {
-            alert('يرجى ملء الاسم والسعر');
-            return;
-        }
-
-        if (!currentMainImageFile && !id) {
-            alert('يرجى اختيار صورة رئيسية للمنتج');
-            return;
-        }
-
-        const syncStatus = document.getElementById('syncStatus');
-        syncStatus.innerHTML = "⏳ جاري رفع الصور إلى السحابة...";
-        syncStatus.style.background = "#fef3c7";
-
-        try {
-            let mainImageUrl = "";
-            let extraImagesUrls = [];
-
-            // رفع الصورة الرئيسية
-            if (currentMainImageFile) {
-                const timestamp = Date.now();
-                const mainImagePath = `products/${timestamp}_main_${currentMainImageFile.name}`;
-                mainImageUrl = await uploadImage(currentMainImageFile, mainImagePath);
-            } else if (id) {
-                // لو تعديل وخليت الصورة زي ماهي
-                const snapshot = await productsRef.child(id).once('value');
-                mainImageUrl = snapshot.val()?.mainImage || "";
-            }
-
-            // رفع الصور الإضافية
-            if (currentExtraImagesFiles.length > 0) {
-                const timestamp = Date.now();
-                for (let i = 0; i < currentExtraImagesFiles.length; i++) {
-                    const file = currentExtraImagesFiles[i];
-                    const extraImagePath = `products/${timestamp}_extra_${i}_${file.name}`;
-                    const url = await uploadImage(file, extraImagePath);
-                    extraImagesUrls.push(url);
-                }
-            } else if (id) {
-                const snapshot = await productsRef.child(id).once('value');
-                extraImagesUrls = snapshot.val()?.images || [];
-            }
-
-            const specs = collectSpecs();
-            const extraFields = collectExtraFields();
-
-            const productData = {
-                id: id || Date.now().toString(),
-                name, price, shortDesc, 
-                mainImage: mainImageUrl,
-                images: extraImagesUrls,
-                specs: specs,
-                extraFields: extraFields
-            };
-
-            if (id) {
-                await productsRef.child(id).update(productData);
-                alert('✅ تم التعديل بنجاح!');
-            } else {
-                const newId = Date.now().toString();
-                productData.id = newId;
-                await productsRef.child(newId).set(productData);
-                alert('✅ تمت إضافة المنتج بنجاح!');
-            }
-            
-            syncStatus.innerHTML = "☁️ متصل بالسحابة - الصور ترفع على Firebase Storage";
-            syncStatus.style.background = "#e0f2fe";
-            resetForm();
-            renderProductTable();
-            
-        } catch(error) {
-            console.error(error);
-            alert('❌ خطأ في الحفظ: ' + error.message);
-            syncStatus.innerHTML = "❌ خطأ في الاتصال - حاول مرة أخرى";
-            syncStatus.style.background = "#fee2e2";
-        }
+        const mainImage = document.getElementById('mainImage').value.trim();
+        const extraImagesRaw = document.getElementById('extraImages').value.trim();
+        let imagesArray = extraImagesRaw ? extraImagesRaw.split(',').map(s=>s.trim()) : [];
+        if(mainImage && !imagesArray.includes(mainImage)) imagesArray.unshift(mainImage);
+        const specs = collectSpecs();
+        const extraFields = collectExtraFields();
+        if(!name || !price || !mainImage) { alert('يرجى ملء الاسم والسعر والصورة'); return; }
+        const productData = { id: id || Date.now().toString(), name, price, shortDesc, mainImage, images: imagesArray, specs, extraFields };
+        if(id) { productsRef.child(id).update(productData).then(()=>{ alert('✅ تم التعديل'); resetForm(); }); }
+        else { productsRef.child(productData.id).set(productData).then(()=>{ alert('✅ تمت الإضافة'); resetForm(); }); }
     }
 
     function renderProductTable() {
         const tbody = document.getElementById('tableBody');
         const productsArray = Object.values(allProducts);
-        if(!productsArray.length) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">لا توجد منتجات. أضف منتجك الأول!</td></tr>';
-            return;
-        }
-        tbody.innerHTML = productsArray.map(prod => {
-            let specsShort = Object.entries(prod.specs || {}).map(([k,v])=>`${k}:${v}`).join(', ') || '-';
-            return `
-                <tr>
-                    <td><img class="small-img" src="${prod.mainImage}" onerror="this.src='https://picsum.photos/id/1/50/50'"></td>
-                    <td>${prod.name}</td>
-                    <td>${prod.price} ج.م</td>
-                    <td>${specsShort.substring(0,50)}</td>
-                    <td class="product-actions">
-                        <button class="edit-btn" onclick="editProduct('${prod.id}')">✏️ تعديل</button>
-                        <button class="delete-btn" onclick="deleteProduct('${prod.id}')">🗑️ حذف</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
+        if(!productsArray.length) { tbody.innerHTML = '<tr><td colspan="5">لا توجد منتجات</td></tr>'; return; }
+        tbody.innerHTML = productsArray.map(prod => `<tr><td><img class="small-img" src="${prod.mainImage}"></td><td>${prod.name}</td><td>${prod.price} ج.م</td><td>${Object.entries(prod.specs||{}).map(([k,v])=>`${k}:${v}`).join(', ').substring(0,40)}</td><td><button class="edit-btn" onclick="editProduct('${prod.id}')">تعديل</button><button class="delete-btn" onclick="deleteProduct('${prod.id}')">حذف</button></td></tr>`).join('');
     }
 
-    function listenToProducts() {
-        productsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                allProducts = data;
-                renderProductTable();
-            } else {
-                allProducts = {};
-                renderProductTable();
-            }
-        });
-    }
-
-    async function editProduct(id) {
-        const snapshot = await productsRef.child(id).once('value');
-        const prod = snapshot.val();
-        if(!prod) return;
-        
-        document.getElementById('editId').value = id;
-        document.getElementById('prodName').value = prod.name;
-        document.getElementById('prodPrice').value = prod.price;
-        document.getElementById('shortDesc').value = prod.shortDesc || '';
-        
-        // عرض الصورة الرئيسية الحالية
-        if(prod.mainImage) {
-            document.getElementById('mainImagePreview').innerHTML = `<img src="${prod.mainImage}" alt="الصورة الرئيسية" style="width:100px;">`;
-        }
-        
-        // عرض الصور الإضافية الحالية
-        if(prod.images && prod.images.length) {
-            let imgsHtml = '';
-            prod.images.forEach(img => { 
-                imgsHtml += `<img src="${img}" alt="صورة إضافية" style="width:80px;">`; 
-            });
-            document.getElementById('extraImagesPreview').innerHTML = imgsHtml;
-        }
-        
-        document.getElementById('specsContainer').innerHTML = `<div class="spec-row"><input placeholder="المفتاح" class="specKey" style="flex:1;"><input placeholder="القيمة" class="specValue" style="flex:1;"><button type="button" onclick="addSpecRow()" style="background:#4ade80; padding:0.5rem 1rem;">+</button></div>`;
-        for(const [k,v] of Object.entries(prod.specs || {})) {
-            addSpecRow(k, v);
-        }
-        
-        document.getElementById('extraContainer').innerHTML = `<div class="extra-row"><input placeholder="اسم الحقل" class="extraName" style="flex:1;"><input placeholder="قيمة الحقل" class="extraVal" style="flex:1;"><button type="button" onclick="addExtraRow()" style="background:#a78bfa; padding:0.5rem 1rem;">+</button></div>`;
-        if(prod.extraFields) {
-            prod.extraFields.forEach(ef => addExtraRow(ef.fieldName, ef.fieldValue));
-        }
-        document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
-        
-        // مسح الملفات الحالية عشان ما تتعادش
-        currentMainImageFile = null;
-        currentExtraImagesFiles = [];
-        document.getElementById('mainImageFile').value = '';
-        document.getElementById('extraImagesFiles').value = '';
-    }
-
-    async function deleteProduct(id) {
-        if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-            await productsRef.child(id).remove();
-            alert('✅ تم الحذف');
-        }
-    }
-
-    function resetForm() {
-        document.getElementById('editId').value = '';
-        document.getElementById('prodName').value = '';
-        document.getElementById('prodPrice').value = '';
-        document.getElementById('shortDesc').value = '';
-        document.getElementById('mainImageFile').value = '';
-        document.getElementById('mainImagePreview').innerHTML = '';
-        document.getElementById('extraImagesFiles').value = '';
-        document.getElementById('extraImagesPreview').innerHTML = '';
-        document.getElementById('specsContainer').innerHTML = `<div class="spec-row"><input placeholder="المفتاح" class="specKey" style="flex:1;"><input placeholder="القيمة" class="specValue" style="flex:1;"><button type="button" onclick="addSpecRow()" style="background:#4ade80; padding:0.5rem 1rem;">+</button></div>`;
-        document.getElementById('extraContainer').innerHTML = `<div class="extra-row"><input placeholder="اسم الحقل" class="extraName" style="flex:1;"><input placeholder="قيمة الحقل" class="extraVal" style="flex:1;"><button type="button" onclick="addExtraRow()" style="background:#a78bfa; padding:0.5rem 1rem;">+</button></div>`;
-        document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
-        currentMainImageFile = null;
-        currentExtraImagesFiles = [];
-    }
-
-    function exportData() {
-        const products = JSON.stringify(allProducts);
-        const blob = new Blob([products], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'el_dokkan_backup.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        alert('✅ تم تصدير المنتجات بنجاح!');
-    }
-
-    async function importData(fileInput) {
-        const file = fileInput.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-            try {
-                const products = JSON.parse(e.target.result);
-                for (const [id, product] of Object.entries(products)) {
-                    await productsRef.child(id).set(product);
-                }
-                alert('✅ تم استيراد المنتجات بنجاح!');
-                resetForm();
-            } catch(err) {
-                alert('❌ ملف غير صالح');
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    window.addSpecRow = function(keyVal='', valVal='') {
-        const container = document.getElementById('specsContainer');
-        const div = document.createElement('div');
-        div.className = 'spec-row';
-        div.style.display = 'flex';
-        div.style.gap = '0.7rem';
-        div.style.marginBottom = '0.7rem';
-        div.style.alignItems = 'center';
-        div.style.flexWrap = 'wrap';
-        div.innerHTML = `
-            <input placeholder="المفتاح" class="specKey" value="${escapeHtml(keyVal)}" style="flex:1;">
-            <input placeholder="القيمة" class="specValue" value="${escapeHtml(valVal)}" style="flex:1;">
-            <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; padding:0.5rem 1rem; border-radius:20px;">❌</button>
-        `;
-        container.appendChild(div);
-    };
-    
-    window.addExtraRow = function(nameVal='', valueVal='') {
-        const container = document.getElementById('extraContainer');
-        const div = document.createElement('div');
-        div.className = 'extra-row';
-        div.style.display = 'flex';
-        div.style.gap = '0.7rem';
-        div.style.marginBottom = '0.7rem';
-        div.style.alignItems = 'center';
-        div.style.flexWrap = 'wrap';
-        div.innerHTML = `
-            <input placeholder="اسم الحقل (مثل: الوزن)" class="extraName" value="${escapeHtml(nameVal)}" style="flex:1;">
-            <input placeholder="قيمة الحقل" class="extraVal" value="${escapeHtml(valueVal)}" style="flex:1;">
-            <button type="button" onclick="this.parentElement.remove()" style="background:#ef4444; padding:0.5rem 1rem; border-radius:20px;">❌</button>
-        `;
-        container.appendChild(div);
-    };
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        listenToProducts();
-    });
+    productsRef.on('value', (snapshot) => { allProducts = snapshot.val()||{}; renderProductTable(); });
+    function collectSpecs() { let s={}; document.querySelectorAll('#specsContainer .spec-row').forEach(r=>{ let k=r.querySelector('.specKey')?.value.trim(), v=r.querySelector('.specValue')?.value.trim(); if(k&&v) s[k]=v; }); return s; }
+    function collectExtraFields() { let e=[]; document.querySelectorAll('#extraContainer .extra-row').forEach(r=>{ let n=r.querySelector('.extraName')?.value.trim(), v=r.querySelector('.extraVal')?.value.trim(); if(n&&v) e.push({fieldName:n,fieldValue:v}); }); return e; }
+    function resetForm() { document.getElementById('editId').value=''; document.getElementById('prodName').value=''; document.getElementById('prodPrice').value=''; document.getElementById('shortDesc').value=''; document.getElementById('mainImage').value=''; document.getElementById('extraImages').value=''; document.getElementById('specsContainer').innerHTML='<div class="spec-row"><input placeholder="المفتاح" class="specKey" style="flex:1;"><input placeholder="القيمة" class="specValue" style="flex:1;"><button type="button" onclick="addSpecRow()">+</button></div>'; document.getElementById('extraContainer').innerHTML='<div class="extra-row"><input placeholder="اسم الحقل" class="extraName" style="flex:1;"><input placeholder="قيمة الحقل" class="extraVal" style="flex:1;"><button type="button" onclick="addExtraRow()">+</button></div>'; document.getElementById('formTitle').innerText='➕ إضافة منتج جديد'; }
+    function editProduct(id) { productsRef.child(id).once('value', (snap)=>{ let p=snap.val(); if(p){ document.getElementById('editId').value=id; document.getElementById('prodName').value=p.name; document.getElementById('prodPrice').value=p.price; document.getElementById('shortDesc').value=p.shortDesc||''; document.getElementById('mainImage').value=p.mainImage; document.getElementById('extraImages').value=(p.images||[]).filter(i=>i!==p.mainImage).join(','); document.getElementById('specsContainer').innerHTML='<div class="spec-row"><input placeholder="المفتاح" class="specKey"><input placeholder="القيمة" class="specValue"><button onclick="addSpecRow()">+</button></div>'; for(const[k,v]of Object.entries(p.specs||{})) addSpecRow(k,v); document.getElementById('extraContainer').innerHTML='<div class="extra-row"><input placeholder="اسم الحقل" class="extraName"><input placeholder="قيمة الحقل" class="extraVal"><button onclick="addExtraRow()">+</button></div>'; if(p.extraFields) p.extraFields.forEach(ef=>addExtraRow(ef.fieldName,ef.fieldValue)); document.getElementById('formTitle').innerText='✏️ تعديل المنتج'; } }); }
+    function deleteProduct(id) { if(confirm('حذف؟')) productsRef.child(id).remove().then(()=>alert('تم الحذف')); }
+    window.addSpecRow = function(k='',v='') { let div=document.createElement('div'); div.className='spec-row'; div.innerHTML=`<input placeholder="المفتاح" class="specKey" value="${k}"><input placeholder="القيمة" class="specValue" value="${v}"><button onclick="this.parentElement.remove()">❌</button>`; document.getElementById('specsContainer').appendChild(div); };
+    window.addExtraRow = function(n='',v='') { let div=document.createElement('div'); div.className='extra-row'; div.innerHTML=`<input placeholder="اسم الحقل" class="extraName" value="${n}"><input placeholder="قيمة الحقل" class="extraVal" value="${v}"><button onclick="this.parentElement.remove()">❌</button>`; document.getElementById('extraContainer').appendChild(div); };
+    document.addEventListener('DOMContentLoaded', () => { renderProductTable(); });
 </script>
 </body>
 </html>
