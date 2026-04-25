@@ -150,6 +150,19 @@
             margin-bottom: 1rem;
             text-align: center;
         }
+        .upload-progress {
+            background: #e2e8f0;
+            border-radius: 20px;
+            height: 6px;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        .upload-progress-bar {
+            background: #f59e0b;
+            border-radius: 20px;
+            height: 6px;
+            width: 0%;
+        }
         @media (max-width: 700px) {
             th, td {
                 font-size: 0.8rem;
@@ -157,9 +170,10 @@
             }
         }
     </style>
-    <!-- Firebase SDK -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
 <body>
 
@@ -199,7 +213,7 @@
     </div>
 
     <div class="sync-status" id="syncStatus">
-        ☁️ متصل بالسحابة - التغييرات تظهر فوراً على كل الأجهزة
+        ☁️ متصل بالسحابة - الصور ترفع على Firebase Storage
     </div>
 
     <div class="form-card">
@@ -222,21 +236,20 @@
         </div>
         
         <div class="form-group">
-            <label>🖼️ الصورة الرئيسية * (رابط URL أو اختر ملف)</label>
+            <label>🖼️ الصورة الرئيسية *</label>
             <input type="file" id="mainImageFile" accept="image/*" onchange="previewMainImage(this)">
-            <input type="text" id="mainImageUrl" placeholder="أو اكتب رابط الصورة هنا" style="margin-top:0.5rem;">
             <div class="image-preview" id="mainImagePreview"></div>
-            <input type="hidden" id="mainImageData" value="">
-            <div class="help-text">⭐ اختر صورة من جهازك أو استخدم رابط من الإنترنت</div>
+            <div class="upload-progress" id="mainUploadProgress">
+                <div class="upload-progress-bar" id="mainProgressBar"></div>
+            </div>
+            <div class="help-text">⭐ اختر صورة من جهازك - سيتم رفعها تلقائياً على Firebase Storage</div>
         </div>
         
         <div class="form-group">
-            <label>🖼️ صور إضافية للمنتج (روابط أو ملفات)</label>
+            <label>🖼️ صور إضافية للمنتج (اختر عدة صور)</label>
             <input type="file" id="extraImagesFiles" accept="image/*" multiple onchange="previewExtraImages(this)">
-            <input type="text" id="extraImagesUrls" placeholder="أو اكتب روابط الصور مفصولة بفاصلة" style="margin-top:0.5rem;">
             <div class="image-preview" id="extraImagesPreview"></div>
-            <input type="hidden" id="extraImagesData" value="">
-            <div class="help-text">⭐ يمكنك اختيار عدة صور من جهازك أو كتابة روابطها</div>
+            <div class="help-text">⭐ يمكنك اختيار أكثر من صورة - سيتم رفعها على Firebase Storage</div>
         </div>
         
         <div class="form-group">
@@ -295,45 +308,62 @@
     };
     // =================================================
 
+    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    const storage = firebase.storage();
     const productsRef = database.ref('products');
 
     let allProducts = {};
+    let currentMainImageFile = null;
+    let currentExtraImagesFiles = [];
 
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
+    // معاينة الصورة الرئيسية
+    function previewMainImage(input) {
+        const previewDiv = document.getElementById('mainImagePreview');
+        if (input.files && input.files[0]) {
+            currentMainImageFile = input.files[0];
             const reader = new FileReader();
+            reader.onload = function(e) {
+                previewDiv.innerHTML = `<img src="${e.target.result}" alt="الصورة الرئيسية">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // معاينة الصور الإضافية
+    function previewExtraImages(input) {
+        const previewDiv = document.getElementById('extraImagesPreview');
+        currentExtraImagesFiles = Array.from(input.files);
+        previewDiv.innerHTML = '';
+        currentExtraImagesFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewDiv.innerHTML += `<img src="${e.target.result}" alt="صورة إضافية">`;
+            };
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
         });
     }
 
-    async function previewMainImage(input) {
-        const previewDiv = document.getElementById('mainImagePreview');
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const base64 = await fileToBase64(file);
-            document.getElementById('mainImageData').value = base64;
-            document.getElementById('mainImageUrl').value = '';
-            previewDiv.innerHTML = `<img src="${base64}" alt="الصورة الرئيسية">`;
-        }
-    }
-
-    async function previewExtraImages(input) {
-        const previewDiv = document.getElementById('extraImagesPreview');
-        const files = Array.from(input.files);
-        const base64Array = [];
-        previewDiv.innerHTML = '';
-        
-        for (const file of files) {
-            const base64 = await fileToBase64(file);
-            base64Array.push(base64);
-            previewDiv.innerHTML += `<img src="${base64}" alt="صورة إضافية">`;
-        }
-        document.getElementById('extraImagesData').value = JSON.stringify(base64Array);
-        document.getElementById('extraImagesUrls').value = '';
+    // رفع صورة إلى Firebase Storage
+    async function uploadImage(file, path) {
+        return new Promise((resolve, reject) => {
+            const storageRef = storage.ref(path);
+            const uploadTask = storageRef.put(file);
+            
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Progress
+                },
+                (error) => {
+                    reject(error);
+                },
+                async () => {
+                    const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                    resolve(downloadURL);
+                }
+            );
+        });
     }
 
     function collectSpecs() {
@@ -364,48 +394,61 @@
         const price = document.getElementById('prodPrice').value.trim();
         const shortDesc = document.getElementById('shortDesc').value.trim();
         
-        let mainImage = document.getElementById('mainImageData').value;
-        const mainImageUrl = document.getElementById('mainImageUrl').value.trim();
-        if (mainImageUrl && !mainImage) {
-            mainImage = mainImageUrl;
-        }
-        
-        if (!mainImage && !id) {
-            alert('يرجى إضافة صورة رئيسية (اختيار ملف أو كتابة رابط)');
-            return;
-        }
-        
-        let extraImagesData = document.getElementById('extraImagesData').value;
-        let extraImagesUrls = document.getElementById('extraImagesUrls').value.trim();
-        let imagesArray = [];
-        
-        if (extraImagesData) {
-            imagesArray = JSON.parse(extraImagesData);
-        } else if (extraImagesUrls) {
-            imagesArray = extraImagesUrls.split(',').map(s => s.trim());
-        }
-        
-        if (mainImage && !imagesArray.includes(mainImage)) {
-            imagesArray.unshift(mainImage);
-        }
-        
-        const specs = collectSpecs();
-        const extraFields = collectExtraFields();
-
         if(!name || !price) {
             alert('يرجى ملء الاسم والسعر');
             return;
         }
 
-        const productData = {
-            id: id || Date.now().toString(),
-            name, price, shortDesc, mainImage,
-            images: imagesArray,
-            specs: specs,
-            extraFields: extraFields
-        };
+        if (!currentMainImageFile && !id) {
+            alert('يرجى اختيار صورة رئيسية للمنتج');
+            return;
+        }
+
+        const syncStatus = document.getElementById('syncStatus');
+        syncStatus.innerHTML = "⏳ جاري رفع الصور إلى السحابة...";
+        syncStatus.style.background = "#fef3c7";
 
         try {
+            let mainImageUrl = "";
+            let extraImagesUrls = [];
+
+            // رفع الصورة الرئيسية
+            if (currentMainImageFile) {
+                const timestamp = Date.now();
+                const mainImagePath = `products/${timestamp}_main_${currentMainImageFile.name}`;
+                mainImageUrl = await uploadImage(currentMainImageFile, mainImagePath);
+            } else if (id) {
+                // لو تعديل وخليت الصورة زي ماهي
+                const snapshot = await productsRef.child(id).once('value');
+                mainImageUrl = snapshot.val()?.mainImage || "";
+            }
+
+            // رفع الصور الإضافية
+            if (currentExtraImagesFiles.length > 0) {
+                const timestamp = Date.now();
+                for (let i = 0; i < currentExtraImagesFiles.length; i++) {
+                    const file = currentExtraImagesFiles[i];
+                    const extraImagePath = `products/${timestamp}_extra_${i}_${file.name}`;
+                    const url = await uploadImage(file, extraImagePath);
+                    extraImagesUrls.push(url);
+                }
+            } else if (id) {
+                const snapshot = await productsRef.child(id).once('value');
+                extraImagesUrls = snapshot.val()?.images || [];
+            }
+
+            const specs = collectSpecs();
+            const extraFields = collectExtraFields();
+
+            const productData = {
+                id: id || Date.now().toString(),
+                name, price, shortDesc, 
+                mainImage: mainImageUrl,
+                images: extraImagesUrls,
+                specs: specs,
+                extraFields: extraFields
+            };
+
             if (id) {
                 await productsRef.child(id).update(productData);
                 alert('✅ تم التعديل بنجاح!');
@@ -415,10 +458,17 @@
                 await productsRef.child(newId).set(productData);
                 alert('✅ تمت إضافة المنتج بنجاح!');
             }
+            
+            syncStatus.innerHTML = "☁️ متصل بالسحابة - الصور ترفع على Firebase Storage";
+            syncStatus.style.background = "#e0f2fe";
             resetForm();
+            renderProductTable();
+            
         } catch(error) {
             console.error(error);
             alert('❌ خطأ في الحفظ: ' + error.message);
+            syncStatus.innerHTML = "❌ خطأ في الاتصال - حاول مرة أخرى";
+            syncStatus.style.background = "#fee2e2";
         }
     }
 
@@ -469,17 +519,18 @@
         document.getElementById('prodPrice').value = prod.price;
         document.getElementById('shortDesc').value = prod.shortDesc || '';
         
-        document.getElementById('mainImagePreview').innerHTML = `<img src="${prod.mainImage}" alt="الصورة الرئيسية">`;
-        document.getElementById('mainImageData').value = prod.mainImage;
-        document.getElementById('mainImageUrl').value = '';
+        // عرض الصورة الرئيسية الحالية
+        if(prod.mainImage) {
+            document.getElementById('mainImagePreview').innerHTML = `<img src="${prod.mainImage}" alt="الصورة الرئيسية" style="width:100px;">`;
+        }
         
+        // عرض الصور الإضافية الحالية
         if(prod.images && prod.images.length) {
             let imgsHtml = '';
             prod.images.forEach(img => { 
-                if (img !== prod.mainImage) imgsHtml += `<img src="${img}" alt="صورة إضافية">`; 
+                imgsHtml += `<img src="${img}" alt="صورة إضافية" style="width:80px;">`; 
             });
             document.getElementById('extraImagesPreview').innerHTML = imgsHtml;
-            document.getElementById('extraImagesData').value = JSON.stringify(prod.images.filter(img => img !== prod.mainImage));
         }
         
         document.getElementById('specsContainer').innerHTML = `<div class="spec-row"><input placeholder="المفتاح" class="specKey" style="flex:1;"><input placeholder="القيمة" class="specValue" style="flex:1;"><button type="button" onclick="addSpecRow()" style="background:#4ade80; padding:0.5rem 1rem;">+</button></div>`;
@@ -492,6 +543,12 @@
             prod.extraFields.forEach(ef => addExtraRow(ef.fieldName, ef.fieldValue));
         }
         document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
+        
+        // مسح الملفات الحالية عشان ما تتعادش
+        currentMainImageFile = null;
+        currentExtraImagesFiles = [];
+        document.getElementById('mainImageFile').value = '';
+        document.getElementById('extraImagesFiles').value = '';
     }
 
     async function deleteProduct(id) {
@@ -507,16 +564,14 @@
         document.getElementById('prodPrice').value = '';
         document.getElementById('shortDesc').value = '';
         document.getElementById('mainImageFile').value = '';
-        document.getElementById('mainImageUrl').value = '';
         document.getElementById('mainImagePreview').innerHTML = '';
-        document.getElementById('mainImageData').value = '';
         document.getElementById('extraImagesFiles').value = '';
-        document.getElementById('extraImagesUrls').value = '';
         document.getElementById('extraImagesPreview').innerHTML = '';
-        document.getElementById('extraImagesData').value = '';
         document.getElementById('specsContainer').innerHTML = `<div class="spec-row"><input placeholder="المفتاح" class="specKey" style="flex:1;"><input placeholder="القيمة" class="specValue" style="flex:1;"><button type="button" onclick="addSpecRow()" style="background:#4ade80; padding:0.5rem 1rem;">+</button></div>`;
         document.getElementById('extraContainer').innerHTML = `<div class="extra-row"><input placeholder="اسم الحقل" class="extraName" style="flex:1;"><input placeholder="قيمة الحقل" class="extraVal" style="flex:1;"><button type="button" onclick="addExtraRow()" style="background:#a78bfa; padding:0.5rem 1rem;">+</button></div>`;
         document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
+        currentMainImageFile = null;
+        currentExtraImagesFiles = [];
     }
 
     function exportData() {
