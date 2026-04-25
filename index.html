@@ -3,157 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>الدكان | El Dokkan - متجرك الإلكتروني</title>
+    <title>الدكان | El Dokkan - أحدث المنتجات في مصر</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: #f5f7fb;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
             color: #1e293b;
         }
 
+        /* Header أنيق */
         .header {
             background: linear-gradient(135deg, #0f172a, #1e293b);
             color: white;
-            padding: 1rem 2rem;
+            padding: 1.2rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .logo h1 {
-            font-size: 1.8rem;
-            letter-spacing: 1px;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .logo p {
             font-size: 0.8rem;
-            opacity: 0.8;
+            opacity: 0.75;
         }
 
         .admin-link a {
-            background: #f59e0b;
-            color: #1e293b;
-            padding: 0.5rem 1.2rem;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 0.6rem 1.5rem;
             border-radius: 50px;
             text-decoration: none;
             font-weight: bold;
-            transition: 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         .admin-link a:hover {
-            background: #d97706;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245,158,11,0.4);
         }
 
+        /* شريط البحث */
         .controls {
-            padding: 1.5rem 2rem;
-            background: white;
-            margin: 1rem 2rem;
-            border-radius: 30px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
+            padding: 1.2rem 2rem;
+            background: rgba(255,255,255,0.95);
+            margin: 1.5rem 2rem;
+            border-radius: 60px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            backdrop-filter: blur(10px);
         }
 
         .controls input {
-            flex: 2;
-            min-width: 200px;
-            padding: 0.8rem 1.2rem;
-            border: 1px solid #e2e8f0;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e2e8f0;
             border-radius: 50px;
             font-size: 1rem;
             outline: none;
+            transition: all 0.3s;
+            background: white;
         }
 
         .controls input:focus {
             border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.2);
         }
 
+        /* شبكة المنتجات - صور أصغر ومنتجات أكتر */
         .products-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.8rem;
-            padding: 1rem 2rem 3rem;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.2rem;
+            padding: 0.5rem 2rem 3rem;
             max-width: 1400px;
             margin: 0 auto;
         }
 
+        /* بطاقة المنتج - تصميم عصري */
         .product-card {
             background: white;
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.35s cubic-bezier(0.2, 0, 0, 1);
             cursor: pointer;
-            border: 1px solid #eef2ff;
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
         }
 
         .product-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 30px rgba(0,0,0,0.1);
-            border-color: #f59e0b;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.12);
         }
 
+        /* الصور أصغر حجماً وأسرع تحميل */
         .product-img {
             width: 100%;
-            height: 200px;
+            height: 160px;
             object-fit: cover;
             background: #f1f5f9;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.05);
         }
 
         .product-info {
-            padding: 1rem;
+            padding: 0.9rem;
         }
 
         .product-title {
-            font-size: 1.1rem;
-            font-weight: bold;
+            font-size: 1rem;
+            font-weight: 800;
             margin-bottom: 0.3rem;
             color: #0f172a;
-        }
-
-        .product-price {
-            color: #f59e0b;
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin: 0.5rem 0;
-        }
-
-        .product-short-desc {
-            font-size: 0.8rem;
-            color: #475569;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .badge {
-            background: #e2e8f0;
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
+        .product-price {
+            background: linear-gradient(135deg, #f59e0b, #e67e22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin: 0.4rem 0;
+        }
+
+        .product-short-desc {
             font-size: 0.7rem;
+            color: #64748b;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .badge {
+            background: #f1f5f9;
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.65rem;
             margin-top: 0.5rem;
+            color: #f59e0b;
+            font-weight: 600;
         }
 
         .empty-state {
             text-align: center;
             padding: 4rem;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: #64748b;
             grid-column: 1 / -1;
         }
@@ -163,6 +187,7 @@
             padding: 4rem;
             font-size: 1.2rem;
             color: #f59e0b;
+            font-weight: bold;
         }
 
         footer {
@@ -171,15 +196,50 @@
             background: #0f172a;
             color: #94a3b8;
             margin-top: 2rem;
+            font-size: 0.85rem;
+        }
+
+        /* زر واتساب عائم صغير */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #25D366;
+            color: white;
+            border-radius: 50px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(37,211,102,0.3);
+            z-index: 99;
+            font-size: 0.85rem;
         }
 
         @media (max-width: 640px) {
             .products-container {
-                padding: 1rem;
-                gap: 1rem;
+                padding: 0.5rem 1rem 2rem;
+                gap: 0.9rem;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            .product-img {
+                height: 130px;
+            }
+            .product-title {
+                font-size: 0.85rem;
+            }
+            .product-price {
+                font-size: 1rem;
             }
             .controls {
                 margin: 1rem;
+                padding: 0.8rem 1.2rem;
+            }
+            .whatsapp-float {
+                padding: 8px 15px;
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -191,8 +251,8 @@
 
 <div class="header">
     <div class="logo">
-        <h1>الدكان 🛍️</h1>
-        <p>El Dokkan | Online Store</p>
+        <h1>🛍️ الدكان</h1>
+        <p>El Dokkan | اكتشف الأفضل</p>
     </div>
     <div class="admin-link">
         <a href="admin.html">📦 لوحة التحكم</a>
@@ -200,19 +260,23 @@
 </div>
 
 <div class="controls">
-    <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج... (اسم أو مواصفات)">
+    <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج... (اسم أو وصف)">
 </div>
 
 <div class="products-container" id="productsContainer">
-    <div class="loading">✨ جاري تحميل المنتجات من السحابة...</div>
+    <div class="loading">✨ جاري تحميل أحدث المنتجات...</div>
 </div>
 
 <footer>
-    الدكان - جميع الحقوق محفوظة © 2025 | تواصل معنا واتساب: 01000621448
+    الدكان - جميع الحقوق محفوظة © 2025 | الدفع عند الاستلام | تواصل: 01000621448
 </footer>
 
+<a href="https://wa.me/201000621448" target="_blank" class="whatsapp-float">
+    📱 تواصل واتساب
+</a>
+
 <script>
-    // ========== إعدادات Firebase - بياناتك أنت ==========
+    // إعدادات Firebase - بياناتك
     const firebaseConfig = {
         apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
         authDomain: "el-dokkan-abc4e.firebaseapp.com",
@@ -220,33 +284,28 @@
         projectId: "el-dokkan-abc4e",
         storageBucket: "el-dokkan-abc4e.firebasestorage.app",
         messagingSenderId: "720051498127",
-        appId: "1:720051498127:web:eb3d90666c76fb718494fa",
-        measurementId: "G-05LN632QHN"
+        appId: "1:720051498127:web:eb3d90666c76fb718494fa"
     };
-    // =================================================
 
-    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const productsRef = database.ref('products');
 
-    let allProducts = [];
-
     function renderProducts(productsArray) {
         const container = document.getElementById('productsContainer');
         if (!productsArray || productsArray.length === 0) {
-            container.innerHTML = '<div class="empty-state">😢 لا توجد منتجات حالياً - أضف منتجات من لوحة التحكم</div>';
+            container.innerHTML = '<div class="empty-state">📭 لا توجد منتجات حالياً - أضف منتجك الأول من لوحة التحكم</div>';
             return;
         }
 
         container.innerHTML = productsArray.map(product => `
             <div class="product-card" onclick="viewProduct('${product.id}')">
-                <img class="product-img" src="${product.mainImage || 'https://picsum.photos/id/1/300/200'}" alt="${product.name}" onerror="this.src='https://picsum.photos/id/1/300/200'">
+                <img class="product-img" src="${product.mainImage || 'https://picsum.photos/id/1/300/200'}" alt="${product.name}" loading="lazy" onerror="this.src='https://picsum.photos/id/1/300/200'">
                 <div class="product-info">
                     <div class="product-title">${escapeHtml(product.name)}</div>
                     <div class="product-price">${product.price} ج.م</div>
                     <div class="product-short-desc">${escapeHtml(product.shortDesc || '')}</div>
-                    <div class="badge">🛒 اضغط للمزيد</div>
+                    <div class="badge">🔥 تفاصيل المنتج</div>
                 </div>
             </div>
         `).join('');
@@ -262,48 +321,43 @@
         });
     }
 
-    function filterProducts() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = allProducts.filter(p => 
-            p.name.toLowerCase().includes(searchTerm) || 
-            (p.shortDesc && p.shortDesc.toLowerCase().includes(searchTerm)) ||
-            JSON.stringify(p.specs || {}).toLowerCase().includes(searchTerm)
-        );
-        renderProducts(filtered);
-    }
-
     window.viewProduct = function(productId) {
         window.location.href = `product.html?id=${productId}`;
     };
 
-    // تحميل المنتجات من Firebase في الوقت الفعلي
-    function loadProductsFromFirebase() {
-        productsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            console.log("🔥 Firebase Data:", data);
-            if (data) {
-                // تحويل الكائن إلى مصفوفة مع الاحتفاظ بالـ id
-                allProducts = Object.keys(data).map(key => ({
-                    id: key,
-                    ...data[key]
-                }));
-                renderProducts(allProducts);
-            } else {
-                allProducts = [];
-                renderProducts([]);
+    // تحميل المنتجات الفوري
+    productsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            const productsList = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            }));
+            renderProducts(productsList);
+            
+            // تفعيل البحث
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput && !searchInput.hasListener) {
+                searchInput.hasListener = true;
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    if (!term) {
+                        renderProducts(productsList);
+                        return;
+                    }
+                    const filtered = productsList.filter(p => 
+                        p.name.toLowerCase().includes(term) || 
+                        (p.shortDesc && p.shortDesc.toLowerCase().includes(term))
+                    );
+                    renderProducts(filtered);
+                });
             }
-        }, (error) => {
-            console.error("❌ Firebase Error:", error);
-            document.getElementById('productsContainer').innerHTML = '<div class="empty-state">❌ خطأ في الاتصال بقاعدة البيانات: ' + error.message + '</div>';
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        loadProductsFromFirebase();
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', filterProducts);
+        } else {
+            renderProducts([]);
         }
+    }, (error) => {
+        console.error(error);
+        document.getElementById('productsContainer').innerHTML = '<div class="empty-state">⚠️ خطأ في الاتصال - تأكد من اتصالك بالإنترنت</div>';
     });
 </script>
 </body>
