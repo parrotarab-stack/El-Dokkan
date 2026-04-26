@@ -11,7 +11,6 @@
         .container { max-width: 1300px; margin: 0 auto; }
         .header { background: #0f172a; color: white; padding: 15px 25px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; }
         .btn { background: #f59e0b; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: bold; color: #0f172a; }
-        .btn-danger { background: #ef4444; color: white; }
         .btn-secondary { background: #64748b; color: white; }
         .form-card { background: white; border-radius: 24px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 18px; }
@@ -22,7 +21,7 @@
         th, td { text-align: right; padding: 12px; border-bottom: 1px solid #e2e8f0; }
         .edit-btn { background: #3b82f6; color: white; border: none; padding: 5px 12px; border-radius: 20px; cursor: pointer; margin: 3px; }
         .delete-btn { background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
-        .small-img { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; background: #f1f5f9; }
+        .small-img { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; }
         .logout-btn { background: #dc2626; color: white; border: none; padding: 8px 18px; border-radius: 30px; cursor: pointer; }
         .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #0f172a; border-right: 4px solid #f59e0b; padding-right: 12px; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -31,7 +30,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .msg { background: #dcfce7; color: #166534; padding: 10px; border-radius: 12px; margin-bottom: 15px; display: none; }
-        .icon-select { font-size: 24px; text-align: center; cursor: pointer; }
         @media (max-width: 700px) { th, td { font-size: 12px; padding: 6px; } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -40,7 +38,6 @@
 <body>
 
 <script>
-    // حماية لوحة التحكم
     const ADMIN_USER = "admin";
     const ADMIN_PASS = "dokkan2025";
     if (!sessionStorage.getItem('adminAuth')) {
@@ -70,7 +67,7 @@
 
     <div class="tabs">
         <button class="tab-btn active" onclick="showTab('products')">📦 المنتجات</button>
-        <button class="tab-btn" onclick="showTab('categories')">🏷️ الأقسام (كاتوجوريات)</button>
+        <button class="tab-btn" onclick="showTab('categories')">🏷️ الأقسام</button>
     </div>
 
     <!-- ================= تبويب المنتجات ================= -->
@@ -89,17 +86,18 @@
         </div>
         <div class="products-table">
             <h3>📋 قائمة المنتجات</h3>
-            <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>المواصفات</th><th>حذف</th></thead><tbody id="productsTableBody"><tr><td colspan="6">✨ جاري التحميل...</tr></tbody></table>
+            <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>الوصف</th><th>إجراءات</th></tr></thead><tbody id="productsTableBody"><tr><td colspan="6">✨ جاري التحميل...</td></tr></tbody>赶
         </div>
     </div>
 
     <!-- ================= تبويب الأقسام ================= -->
     <div id="categoriesTab" class="tab-content">
         <div class="form-card">
-            <h3>➕ إضافة قسم جديد</h3>
-            <div class="form-group"><label>اسم القسم</label><input type="text" id="newCatName" placeholder="مثال: إلكترونيات"></div>
+            <h3 id="categoryFormTitle">➕ إضافة قسم جديد</h3>
+            <input type="hidden" id="editCategoryId">
+            <div class="form-group"><label>اسم القسم</label><input type="text" id="catName" placeholder="مثال: إلكترونيات"></div>
             <div class="form-group"><label>أيقونة القسم (اختر من القائمة)</label>
-                <select id="newCatIcon" style="font-size: 24px; text-align: center;">
+                <select id="catIcon" style="font-size: 24px;">
                     <option value="📱">📱 إلكترونيات</option>
                     <option value="👕">👕 أزياء</option>
                     <option value="📚">📚 كتب</option>
@@ -114,17 +112,17 @@
                     <option value="✏️">✏️ أدوات</option>
                 </select>
             </div>
-            <button class="btn" id="addCategoryBtn">➕ إضافة القسم</button>
+            <button class="btn" id="saveCategoryBtn">💾 حفظ القسم</button>
+            <button class="btn-secondary" id="resetCategoryBtn">🔄 إلغاء</button>
         </div>
         <div class="categories-table">
             <h3>📋 قائمة الأقسام</h3>
-            <table id="categoriesTable"><thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>حذف</th></tr></thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...</td></tr></tbody></table>
+            <table id="categoriesTable"><thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...</td></tr></tbody>表
         </div>
     </div>
 </div>
 
 <script>
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
         authDomain: "el-dokkan-abc4e.firebaseapp.com",
@@ -142,7 +140,7 @@
     let allProducts = {};
     let allCategories = {};
 
-    // ========== دوال الأقسام ==========
+    // ================= دوال الأقسام =================
     function loadCategories() {
         categoriesRef.on('value', (snap) => {
             allCategories = snap.val() || {};
@@ -169,7 +167,15 @@
         let html = '';
         cats.forEach(cat => {
             let productCount = Object.values(allProducts).filter(p => p.category === cat.id).length;
-            html += `<tr><td style="font-size:24px">${cat.icon}</td><td><strong>${cat.name}</strong></td><td>${productCount} منتج</td><td><button class="delete-btn" onclick="deleteCategory('${cat.id}')">🗑️ حذف</button></td></tr>`;
+            html += `<tr>
+                <td style="font-size:24px">${cat.icon}</td>
+                <td><strong>${cat.name}</strong></td>
+                <td>${productCount} منتج</td>
+                <td>
+                    <button class="edit-btn" onclick="editCategory('${cat.id}')">✏️ تعديل</button>
+                    <button class="delete-btn" onclick="deleteCategory('${cat.id}')">🗑️ حذف</button>
+                </td>
+            </table>`;
         });
         tbody.innerHTML = html;
     }
@@ -182,18 +188,37 @@
         });
     }
 
-    // دالة إضافة قسم
-    document.getElementById('addCategoryBtn').onclick = function() {
-        let name = document.getElementById('newCatName').value.trim();
-        let icon = document.getElementById('newCatIcon').value;
+    // حفظ قسم (جديد أو تعديل)
+    document.getElementById('saveCategoryBtn').onclick = function() {
+        let id = document.getElementById('editCategoryId').value;
+        let name = document.getElementById('catName').value.trim();
+        let icon = document.getElementById('catIcon').value;
         if (!name) { showMessage("اكتب اسم القسم", true); return; }
-        categoriesRef.push({ name, icon }).then(() => {
-            showMessage("✅ تم إضافة القسم");
-            document.getElementById('newCatName').value = '';
-        }).catch(err => showMessage("خطأ: " + err.message, true));
+        let data = { name, icon };
+        if (id) {
+            categoriesRef.child(id).update(data).then(() => {
+                showMessage("✅ تم تعديل القسم");
+                resetCategoryForm();
+            }).catch(err => showMessage("خطأ: " + err.message, true));
+        } else {
+            categoriesRef.push(data).then(() => {
+                showMessage("✅ تم إضافة القسم");
+                resetCategoryForm();
+            }).catch(err => showMessage("خطأ: " + err.message, true));
+        }
     };
 
-    // دالة حذف قسم
+    // تعديل قسم (تحميل البيانات في النموذج)
+    window.editCategory = function(id) {
+        let cat = allCategories[id];
+        if (!cat) return;
+        document.getElementById('editCategoryId').value = id;
+        document.getElementById('catName').value = cat.name;
+        document.getElementById('catIcon').value = cat.icon;
+        document.getElementById('categoryFormTitle').innerText = '✏️ تعديل القسم';
+    };
+
+    // حذف قسم
     window.deleteCategory = function(id) {
         let count = Object.values(allProducts).filter(p => p.category === id).length;
         if (count > 0) {
@@ -205,7 +230,15 @@
         }
     };
 
-    // ========== دوال المنتجات ==========
+    function resetCategoryForm() {
+        document.getElementById('editCategoryId').value = '';
+        document.getElementById('catName').value = '';
+        document.getElementById('catIcon').value = '📱';
+        document.getElementById('categoryFormTitle').innerText = '➕ إضافة قسم جديد';
+    }
+    document.getElementById('resetCategoryBtn').onclick = resetCategoryForm;
+
+    // ================= دوال المنتجات =================
     function renderProductsTable() {
         const tbody = document.getElementById('productsTableBody');
         const keys = Object.keys(allProducts);
@@ -215,18 +248,21 @@
             let p = allProducts[key];
             let cat = allCategories[p.category] || { name: "بدون", icon: "❓" };
             html += `<tr>
-                        <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50'"></td>
-                        <td>${p.name}</td>
-                        <td>${p.price} ج.م</td>
-                        <td>${cat.icon} ${cat.name}</td>
-                        <td>${(p.shortDesc || '').substring(0, 30)}</td>
-                        <td><button class="delete-btn" onclick="deleteProduct('${key}')">🗑️ حذف</button></td>
-                     </tr>`;
+                <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50'"></td>
+                <td>${p.name}</td>
+                <td>${p.price} ج.م</td>
+                <td>${cat.icon} ${cat.name}</td>
+                <td>${(p.shortDesc || '').substring(0, 30)}</td>
+                <td>
+                    <button class="edit-btn" onclick="editProduct('${key}')">✏️ تعديل</button>
+                    <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️ حذف</button>
+                </td>
+            </table>`;
         });
         tbody.innerHTML = html;
     }
 
-    // حفظ المنتج
+    // حفظ منتج (جديد أو تعديل)
     document.getElementById('saveProductBtn').onclick = function() {
         let id = document.getElementById('editProductId').value;
         let name = document.getElementById('prodName').value.trim();
@@ -247,7 +283,21 @@
         }
     };
 
-    // حذف المنتج
+    // تعديل منتج (تحميل البيانات في النموذج)
+    window.editProduct = function(id) {
+        let p = allProducts[id];
+        if (!p) return;
+        document.getElementById('editProductId').value = id;
+        document.getElementById('prodName').value = p.name;
+        document.getElementById('prodPrice').value = p.price;
+        document.getElementById('prodCategory').value = p.category || "";
+        document.getElementById('prodShortDesc').value = p.shortDesc || '';
+        document.getElementById('prodMainImage').value = p.mainImage || '';
+        document.getElementById('prodExtraImages').value = (p.images || []).filter(i => i !== p.mainImage).join(',');
+        document.getElementById('productFormTitle').innerText = '✏️ تعديل المنتج';
+    };
+
+    // حذف منتج
     window.deleteProduct = function(id) {
         if (confirm("⚠️ هل أنت متأكد من حذف هذا المنتج نهائياً؟")) {
             productsRef.child(id).remove().then(() => showMessage("✅ تم حذف المنتج")).catch(err => showMessage("خطأ: " + err.message, true));
@@ -265,12 +315,17 @@
     }
     document.getElementById('resetProductBtn').onclick = resetProductForm;
 
-    // ========== عرض التبويبات ==========
+    // ================= عرض التبويبات =================
     function showTab(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if (tab === 'products') { document.getElementById('productsTab').classList.add('active'); document.querySelector('.tab-btn:first-child').classList.add('active'); } 
-        else { document.getElementById('categoriesTab').classList.add('active'); document.querySelector('.tab-btn:last-child').classList.add('active'); }
+        if (tab === 'products') {
+            document.getElementById('productsTab').classList.add('active');
+            document.querySelector('.tab-btn:first-child').classList.add('active');
+        } else {
+            document.getElementById('categoriesTab').classList.add('active');
+            document.querySelector('.tab-btn:last-child').classList.add('active');
+        }
     }
 
     productsRef.on('value', (snap) => { allProducts = snap.val() || {}; renderProductsTable(); renderCategoriesTable(); });
