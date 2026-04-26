@@ -3,59 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الدكان | المتجر الديناميكي</title>
+    <title>الدكان - المتجر</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-        body { background: #f8fafc; }
-        .top-bar { background: #0f172a; color: #94a3b8; padding: 8px 20px; font-size: 13px; text-align: center; }
-        .main-header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .logo h1 { font-size: 28px; color: #0f172a; }
-        .logo span { color: #f59e0b; }
-        .search-box { flex: 1; max-width: 500px; }
-        .search-box input { width: 100%; padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 50px; font-size: 14px; }
-        .admin-btn { background: #0f172a; color: white; padding: 10px 24px; border-radius: 40px; text-decoration: none; font-weight: 600; }
-        .categories { background: white; padding: 12px 20px; display: flex; gap: 25px; overflow-x: auto; border-bottom: 1px solid #e2e8f0; }
-        .category-link { text-decoration: none; color: #475569; font-weight: 600; font-size: 14px; white-space: nowrap; cursor: pointer; padding: 4px 0; border-bottom: 2px solid transparent; }
-        .category-link.active { color: #f59e0b; border-bottom-color: #f59e0b; }
-        .products-section { padding: 20px; max-width: 1400px; margin: 0 auto; }
-        .section-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; border-right: 4px solid #f59e0b; padding-right: 12px; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        body { background: #f8fafc; font-family: 'Cairo', sans-serif; }
+        .header { background: #0f172a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .logo { font-size: 28px; font-weight: 800; }
+        .admin-btn { background: #f59e0b; padding: 8px 20px; border-radius: 40px; color: #0f172a; text-decoration: none; font-weight: bold; }
+        .search-box { padding: 15px 20px; background: white; margin: 15px; border-radius: 50px; }
+        .search-box input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 50px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; }
         .product-card { background: white; border-radius: 12px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.3s; }
-        .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
+        .product-card:hover { transform: translateY(-4px); }
         .product-img { width: 100%; height: 180px; object-fit: contain; background: #f8fafc; padding: 15px; }
         .product-info { padding: 12px; }
-        .product-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-        .product-price { font-size: 18px; font-weight: 800; color: #f59e0b; }
-        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25D366; color: white; border-radius: 50px; padding: 10px 18px; display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: bold; z-index: 99; }
+        .product-price { color: #f59e0b; font-size: 18px; font-weight: 800; }
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25D366; color: white; padding: 10px 18px; border-radius: 50px; text-decoration: none; }
+        footer { text-align: center; padding: 25px; background: #0f172a; color: #94a3b8; margin-top: 30px; }
         .empty-state { text-align: center; padding: 60px; color: #64748b; grid-column: 1 / -1; }
-        footer { background: #0f172a; color: #94a3b8; text-align: center; padding: 25px; margin-top: 40px; }
-        @media (max-width: 640px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; } .product-img { height: 140px; } .main-header { flex-direction: column; } .search-box { max-width: 100%; width: 100%; } }
+        @media (max-width: 640px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
-<div class="top-bar">🚚 التوصيل داخل السنبلاوين والمنصوره فقط الان | الدفع عند الاستلام</div>
-<div class="main-header">
-    <div class="logo"><h1>الد<span>ك</span>ان</h1></div>
-    <div class="search-box"><input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..."></div>
+<div class="header">
+    <div class="logo">🛍️ الدكان</div>
     <a href="admin.html" class="admin-btn">📦 لوحة التحكم</a>
 </div>
-
-<div class="categories" id="categoriesContainer">✨ جاري تحميل الأقسام...</div>
-
-<div class="products-section">
-    <div class="section-title" id="activeCategoryTitle">🛍️ جميع المنتجات</div>
-    <div class="products-grid" id="productsContainer">✨ جاري تحميل المنتجات...</div>
-</div>
-
-<footer><p>الدكان - El Dokkan © 2026 | الدفع عند الاستلام | واتساب: 01000621448</p></footer>
-<a href="https://wa.me/201000621448" target="_blank" class="whatsapp-float">📱  احمد الديب واتساب</a>
+<div class="search-box"><input type="text" id="search" placeholder="🔍 ابحث عن منتج..."></div>
+<div class="products-grid" id="productsContainer">✨ جاري التحميل...</div>
+<footer><p>الدكان | الدفع عند الاستلام | واتساب: 01000621448</p></footer>
+<a href="https://wa.me/201000621448" class="whatsapp-float">📱 واتساب</a>
 
 <script>
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
         authDomain: "el-dokkan-abc4e.firebaseapp.com",
@@ -68,76 +50,33 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // متغيرات عامة
-    let allCategories = {};
     let allProducts = [];
-    let currentCategory = 'all';
 
-    // دالة عرض الأقسام
-    function renderCategories() {
-        const container = document.getElementById('categoriesContainer');
-        const keys = Object.keys(allCategories);
-        if (keys.length === 0) {
-            container.innerHTML = '<div style="padding: 4px 0;">📭 لا توجد أقسام - أضف قسماً من لوحة التحكم</div>';
-            return;
-        }
-        let html = `<div class="category-link ${currentCategory === 'all' ? 'active' : ''}" data-cat="all">🔥 الكل</div>`;
-        for (let key of keys) {
-            let cat = allCategories[key];
-            html += `<div class="category-link ${currentCategory === key ? 'active' : ''}" data-cat="${key}">${cat.icon} ${cat.name}</div>`;
-        }
-        container.innerHTML = html;
-
-        // إضافة حدث الضغط على كل قسم
-        document.querySelectorAll('.category-link').forEach(el => {
-            el.addEventListener('click', (e) => {
-                currentCategory = el.getAttribute('data-cat');
-                renderCategories(); // إعادة رسم الأقسام (لتحديث الـ active)
-                renderProducts();   // إعادة رسم المنتجات
-                const title = document.getElementById('activeCategoryTitle');
-                if (currentCategory === 'all') title.innerHTML = '🛍️ جميع المنتجات';
-                else title.innerHTML = `${allCategories[currentCategory]?.icon} ${allCategories[currentCategory]?.name}`;
-            });
-        });
-    }
-
-    // دالة عرض المنتجات
-    function renderProducts() {
-        const container = document.getElementById('productsContainer');
-        let filtered = [...allProducts];
-        if (currentCategory !== 'all') filtered = filtered.filter(p => p.category === currentCategory);
-        
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        if (searchTerm) filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm) || (p.shortDesc && p.shortDesc.toLowerCase().includes(searchTerm)));
-        
-        if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">📭 لا توجد منتجات</div>'; return; }
-        
-        container.innerHTML = filtered.map(p => `
-            <div class="product-card" onclick="viewProduct('${p.id}')">
-                <img class="product-img" src="${p.mainImage || 'https://placehold.co/300x300'}" alt="${p.name}" loading="lazy">
+    function render(products) {
+        let container = document.getElementById('productsContainer');
+        if(!products.length) { container.innerHTML = '<div class="empty-state">📭 لا توجد منتجات</div>'; return; }
+        container.innerHTML = products.map(p => `
+            <div class="product-card" onclick="window.location.href='product.html?id=${p.id}'">
+                <img class="product-img" src="${p.mainImage}" loading="lazy">
                 <div class="product-info">
-                    <div class="product-title">${p.name}</div>
+                    <div>${p.name}</div>
                     <div class="product-price">${p.price} ج.م</div>
                 </div>
             </div>
         `).join('');
     }
 
-    window.viewProduct = (id) => window.location.href = `product.html?id=${id}`;
-
-    // تحميل البيانات من Firebase
-    db.ref('categories').on('value', (snap) => {
-        allCategories = snap.val() || {};
-        renderCategories();
-    });
     db.ref('products').on('value', (snap) => {
-        const data = snap.val() || {};
+        let data = snap.val() || {};
         allProducts = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        renderProducts();
+        render(allProducts);
     });
 
-    // البحث
-    document.getElementById('searchInput').addEventListener('input', () => renderProducts());
+    document.getElementById('search').addEventListener('input', (e) => {
+        let term = e.target.value.toLowerCase();
+        if(!term) render(allProducts);
+        else render(allProducts.filter(p => p.name.toLowerCase().includes(term)));
+    });
 </script>
 </body>
 </html>
