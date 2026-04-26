@@ -1,149 +1,51 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - الدكان</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { background: #eef2ff; padding: 20px; font-family: 'Cairo', sans-serif; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .header { background: #0f172a; color: white; padding: 15px 25px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .btn { background: #f59e0b; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: bold; }
-        .card { background: white; border-radius: 24px; padding: 25px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; }
-        input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 12px; }
-        table { width: 100%; background: white; border-radius: 24px; padding: 20px; border-collapse: collapse; }
-        th, td { padding: 10px; text-align: right; border-bottom: 1px solid #e2e8f0; }
-        .edit-btn, .delete-btn { padding: 4px 10px; border-radius: 20px; border: none; cursor: pointer; }
-        .edit-btn { background: #3b82f6; color: white; }
-        .delete-btn { background: #ef4444; color: white; }
-        .small-img { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; }
-        .logout-btn { background: #dc2626; color: white; border: none; padding: 8px 18px; border-radius: 30px; cursor: pointer; }
-        .msg { background: #dcfce7; color: #166534; padding: 10px; border-radius: 12px; margin-bottom: 15px; display: none; }
-    </style>
+    <title>Admin - أضف منتج</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
+        input, button { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; }
+        button { background: #f59e0b; font-weight: bold; cursor: pointer; }
+    </style>
 </head>
 <body>
+    <h2>➕ إضافة منتج</h2>
+    <input type="text" id="name" placeholder="اسم المنتج">
+    <input type="number" id="price" placeholder="السعر">
+    <input type="text" id="image" placeholder="رابط الصورة (مثال: https://i.ibb.co/xxxxx.jpg)">
+    <button onclick="addProduct()">حفظ المنتج</button>
+    <div id="msg" style="margin-top: 10px; color: green;"></div>
 
-<script>
-    if (!sessionStorage.getItem('adminAuth')) {
-        let u = prompt("اسم المستخدم:");
-        let p = prompt("كلمة المرور:");
-        if (u === "admin" && p === "dokkan2025") sessionStorage.setItem('adminAuth', 'true');
-        else { alert("خطأ"); window.location.href = "index.html"; }
-    }
-    function logout() { sessionStorage.clear(); location.reload(); }
-</script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
+            authDomain: "el-dokkan-abc4e.firebaseapp.com",
+            databaseURL: "https://el-dokkan-abc4e-default-rtdb.firebaseio.com",
+            projectId: "el-dokkan-abc4e",
+            storageBucket: "el-dokkan-abc4e.firebasestorage.app",
+            messagingSenderId: "720051498127",
+            appId: "1:720051498127:web:eb3d90666c76fb718494fa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-<div class="container">
-    <div class="header">
-        <h2>⚙️ لوحة التحكم</h2>
-        <div><button onclick="logout()" class="logout-btn">🚪 خروج</button> <a href="index.html" style="color:white;">← المتجر</a></div>
-    </div>
-    <div id="msg" class="msg"></div>
-
-    <div class="card">
-        <h3 id="formTitle">➕ إضافة منتج</h3>
-        <input type="hidden" id="editId">
-        <div class="form-group"><label>اسم المنتج</label><input type="text" id="name" placeholder="اسم المنتج"></div>
-        <div class="form-group"><label>السعر (جنيه)</label><input type="number" id="price" placeholder="السعر"></div>
-        <div class="form-group"><label>وصف مختصر</label><input type="text" id="shortDesc" placeholder="وصف سريع"></div>
-        <div class="form-group"><label>رابط الصورة</label><input type="text" id="mainImage" placeholder="https://i.ibb.co/xxxxx.jpg"></div>
-        <div class="form-group"><label>روابط صور إضافية (فاصلة)</label><input type="text" id="extraImages" placeholder="رابط1, رابط2"></div>
-        <button class="btn" id="saveBtn">💾 حفظ</button>
-        <button class="btn" id="resetBtn" style="background:#64748b;">🔄 إلغاء</button>
-    </div>
-
-    <div class="card">
-        <h3>📋 المنتجات</h3>
-        <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>الوصف</th><th>إجراءات</th></tr></thead><tbody id="tableBody"><tr><td colspan="5">جاري التحميل...</td></tr></tbody><table>
-    </div>
-</div>
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
-        authDomain: "el-dokkan-abc4e.firebaseapp.com",
-        databaseURL: "https://el-dokkan-abc4e-default-rtdb.firebaseio.com",
-        projectId: "el-dokkan-abc4e",
-        storageBucket: "el-dokkan-abc4e.firebasestorage.app",
-        messagingSenderId: "720051498127",
-        appId: "1:720051498127:web:eb3d90666c76fb718494fa"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const productsRef = db.ref('products');
-
-    let allProducts = {};
-
-    function showMessage(text) {
-        let m = document.getElementById('msg');
-        m.innerText = text;
-        m.style.display = 'block';
-        setTimeout(() => m.style.display = 'none', 3000);
-    }
-
-    function renderTable() {
-        let tbody = document.getElementById('tableBody');
-        let keys = Object.keys(allProducts);
-        if(keys.length === 0) { tbody.innerHTML = '<tr><td colspan="5">لا توجد منتجات</td></tr>'; return; }
-        let html = '';
-        keys.forEach(key => {
-            let p = allProducts[key];
-            html += `<tr>
-                        <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50'"></td>
-                        <td>${p.name}</td>
-                        <td>${p.price} ج.م</td>
-                        <td>${p.shortDesc || ''}</td>
-                        <td><button class="edit-btn" onclick="edit('${key}')">تعديل</button> <button class="delete-btn" onclick="del('${key}')">حذف</button></td>
-                    </tr>`;
-        });
-        tbody.innerHTML = html;
-    }
-
-    window.edit = (id) => {
-        let p = allProducts[id];
-        document.getElementById('editId').value = id;
-        document.getElementById('name').value = p.name;
-        document.getElementById('price').value = p.price;
-        document.getElementById('shortDesc').value = p.shortDesc || '';
-        document.getElementById('mainImage').value = p.mainImage;
-        document.getElementById('extraImages').value = (p.images || []).filter(i => i !== p.mainImage).join(',');
-        document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
-    };
-
-    window.del = (id) => { if(confirm("حذف؟")) productsRef.child(id).remove().then(() => showMessage("تم الحذف")); };
-
-    function resetForm() {
-        document.getElementById('editId').value = '';
-        document.getElementById('name').value = '';
-        document.getElementById('price').value = '';
-        document.getElementById('shortDesc').value = '';
-        document.getElementById('mainImage').value = '';
-        document.getElementById('extraImages').value = '';
-        document.getElementById('formTitle').innerText = '➕ إضافة منتج';
-    }
-
-    document.getElementById('saveBtn').onclick = () => {
-        let id = document.getElementById('editId').value;
-        let name = document.getElementById('name').value.trim();
-        let price = document.getElementById('price').value.trim();
-        let shortDesc = document.getElementById('shortDesc').value.trim();
-        let mainImage = document.getElementById('mainImage').value.trim();
-        let extraRaw = document.getElementById('extraImages').value.trim();
-        let images = extraRaw ? extraRaw.split(',').map(s=>s.trim()) : [];
-        if(mainImage && !images.includes(mainImage)) images.unshift(mainImage);
-        if(!name || !price || !mainImage) { alert("املأ الاسم والسعر والصورة"); return; }
-        let data = { name, price, shortDesc, mainImage, images };
-        if(id) productsRef.child(id).update(data).then(() => { showMessage("تم التعديل"); resetForm(); });
-        else productsRef.push(data).then(() => { showMessage("تمت الإضافة"); resetForm(); });
-    };
-    document.getElementById('resetBtn').onclick = resetForm;
-
-    productsRef.on('value', (snap) => { allProducts = snap.val() || {}; renderTable(); });
-</script>
+        window.addProduct = function() {
+            let name = document.getElementById('name').value;
+            let price = document.getElementById('price').value;
+            let image = document.getElementById('image').value;
+            if(!name || !price || !image) { alert("املأ جميع الحقول"); return; }
+            let newProduct = { name: name, price: price, mainImage: image };
+            db.ref('products').push(newProduct).then(() => {
+                document.getElementById('msg').innerText = "✅ تمت إضافة المنتج";
+                document.getElementById('name').value = '';
+                document.getElementById('price').value = '';
+                document.getElementById('image').value = '';
+                setTimeout(() => document.getElementById('msg').innerText = '', 3000);
+            }).catch(err => alert("خطأ: " + err.message));
+        };
+    </script>
 </body>
 </html>
