@@ -50,11 +50,13 @@
 
     function showMessage(msg, isError = false) {
         let m = document.getElementById('globalMsg');
-        m.innerText = msg;
-        m.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
-        m.style.color = isError ? '#991b1b' : '#166534';
-        m.style.display = 'block';
-        setTimeout(() => m.style.display = 'none', 3000);
+        if(m) {
+            m.innerText = msg;
+            m.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
+            m.style.color = isError ? '#991b1b' : '#166534';
+            m.style.display = 'block';
+            setTimeout(() => m.style.display = 'none', 3000);
+        }
     }
 </script>
 
@@ -70,7 +72,7 @@
         <button class="tab-btn" onclick="showTab('categories')">🏷️ الأقسام</button>
     </div>
 
-    <!-- ================= تبويب المنتجات ================= -->
+    <!-- تبويب المنتجات -->
     <div id="productsTab" class="tab-content active">
         <div class="form-card">
             <h3 id="productFormTitle">➕ إضافة منتج جديد</h3>
@@ -86,11 +88,11 @@
         </div>
         <div class="products-table">
             <h3>📋 قائمة المنتجات</h3>
-            <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>الوصف</th><th>إجراءات</th></tr></thead><tbody id="productsTableBody"><tr><td colspan="6">✨ جاري التحميل...右侧杩</tbody>赶
+            <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>الوصف</th><th>إجراءات</th></tr></thead><tbody id="productsTableBody"><tr><td colspan="6">✨ جاري التحميل...</td></table></tbody>赶
         </div>
     </div>
 
-    <!-- ================= تبويب الأقسام ================= -->
+    <!-- تبويب الأقسام -->
     <div id="categoriesTab" class="tab-content">
         <div class="form-card">
             <h3 id="categoryFormTitle">➕ إضافة قسم جديد</h3>
@@ -111,14 +113,13 @@
                     <option value="🎵">🎵 موسيقى</option>
                     <option value="✏️">✏️ أدوات</option>
                 </select>
-                <div class="help-text" style="font-size: 12px; color: #64748b; margin-top: 5px;">⭐ اختار الأيقونة من القائمة</div>
             </div>
             <button class="btn" id="saveCategoryBtn">💾 حفظ القسم</button>
             <button class="btn-secondary" id="resetCategoryBtn">🔄 إلغاء</button>
         </div>
         <div class="categories-table">
             <h3>📋 قائمة الأقسام</h3>
-            <table id="categoriesTable"><thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></tr></thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...{}--</tbody>表
+            <table id="categoriesTable"><thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></tr></thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...右侧杩</tbody>表
         </div>
     </div>
 </div>
@@ -183,13 +184,15 @@
 
     function updateCategorySelect() {
         const select = document.getElementById('prodCategory');
-        select.innerHTML = '<option value="">-- اختر القسم --</option>';
-        Object.keys(allCategories).forEach(key => {
-            select.innerHTML += `<option value="${key}">${allCategories[key].icon} ${allCategories[key].name}</option>`;
-        });
+        if(select) {
+            select.innerHTML = '<option value="">-- اختر القسم --</option>';
+            Object.keys(allCategories).forEach(key => {
+                select.innerHTML += `<option value="${key}">${allCategories[key].icon} ${allCategories[key].name}</option>`;
+            });
+        }
     }
 
-    // حفظ قسم (جديد أو تعديل)
+    // حفظ قسم
     document.getElementById('saveCategoryBtn').onclick = function() {
         let id = document.getElementById('editCategoryId').value;
         let name = document.getElementById('catName').value.trim();
@@ -197,19 +200,12 @@
         if (!name) { showMessage("اكتب اسم القسم", true); return; }
         let data = { name, icon };
         if (id) {
-            categoriesRef.child(id).update(data).then(() => {
-                showMessage("✅ تم تعديل القسم");
-                resetCategoryForm();
-            }).catch(err => showMessage("خطأ: " + err.message, true));
+            categoriesRef.child(id).update(data).then(() => { showMessage("✅ تم تعديل القسم"); resetCategoryForm(); });
         } else {
-            categoriesRef.push(data).then(() => {
-                showMessage("✅ تم إضافة القسم");
-                resetCategoryForm();
-            }).catch(err => showMessage("خطأ: " + err.message, true));
+            categoriesRef.push(data).then(() => { showMessage("✅ تم إضافة القسم"); resetCategoryForm(); });
         }
     };
 
-    // تعديل قسم (تحميل البيانات في النموذج)
     window.editCategory = function(id) {
         let cat = allCategories[id];
         if (!cat) return;
@@ -219,16 +215,10 @@
         document.getElementById('categoryFormTitle').innerText = '✏️ تعديل القسم';
     };
 
-    // حذف قسم
     window.deleteCategory = function(id) {
         let count = Object.values(allProducts).filter(p => p.category === id).length;
-        if (count > 0) {
-            showMessage(`لا يمكن حذف القسم وفيه ${count} منتج. انقل المنتجات أولاً`, true);
-            return;
-        }
-        if (confirm("هل أنت متأكد من حذف هذا القسم نهائياً؟")) {
-            categoriesRef.child(id).remove().then(() => showMessage("✅ تم حذف القسم")).catch(err => showMessage("خطأ: " + err.message, true));
-        }
+        if (count > 0) { showMessage(`لا يمكن حذف القسم وفيه ${count} منتج`, true); return; }
+        if (confirm("حذف القسم نهائياً؟")) categoriesRef.child(id).remove();
     };
 
     function resetCategoryForm() {
@@ -243,7 +233,7 @@
     function renderProductsTable() {
         const tbody = document.getElementById('productsTableBody');
         const keys = Object.keys(allProducts);
-        if (keys.length === 0) { tbody.innerHTML = '<tr><td colspan="6">لا توجد منتجات</td></tr>'; return; }
+        if (keys.length === 0) { tbody.innerHTML = '<td><td colspan="6">لا توجد منتجات</td></tr>'; return; }
         let html = '';
         keys.forEach(key => {
             let p = allProducts[key];
@@ -263,7 +253,6 @@
         tbody.innerHTML = html;
     }
 
-    // حفظ منتج (جديد أو تعديل)
     document.getElementById('saveProductBtn').onclick = function() {
         let id = document.getElementById('editProductId').value;
         let name = document.getElementById('prodName').value.trim();
@@ -284,7 +273,6 @@
         }
     };
 
-    // تعديل منتج (تحميل البيانات في النموذج)
     window.editProduct = function(id) {
         let p = allProducts[id];
         if (!p) return;
@@ -298,11 +286,8 @@
         document.getElementById('productFormTitle').innerText = '✏️ تعديل المنتج';
     };
 
-    // حذف منتج
     window.deleteProduct = function(id) {
-        if (confirm("⚠️ هل أنت متأكد من حذف هذا المنتج نهائياً؟")) {
-            productsRef.child(id).remove().then(() => showMessage("✅ تم حذف المنتج")).catch(err => showMessage("خطأ: " + err.message, true));
-        }
+        if (confirm("حذف المنتج نهائياً؟")) productsRef.child(id).remove();
     };
 
     function resetProductForm() {
@@ -317,7 +302,7 @@
     document.getElementById('resetProductBtn').onclick = resetProductForm;
 
     // ================= عرض التبويبات =================
-    function showTab(tab) {
+    window.showTab = function(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         if (tab === 'products') {
@@ -327,11 +312,10 @@
             document.getElementById('categoriesTab').classList.add('active');
             document.querySelector('.tab-btn:last-child').classList.add('active');
         }
-    }
+    };
 
     productsRef.on('value', (snap) => { allProducts = snap.val() || {}; renderProductsTable(); renderCategoriesTable(); });
     loadCategories();
-    window.showTab = showTab;
 </script>
 </body>
 </html>
