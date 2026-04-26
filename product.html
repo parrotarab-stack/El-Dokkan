@@ -4,42 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تفاصيل المنتج - الدكان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f8fafc; }
-        .navbar { background: #0f172a; padding: 1rem 2rem; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .back-link a { color: #f59e0b; text-decoration: none; font-weight: bold; }
-        .product-detail { max-width: 1100px; margin: 2rem auto; background: white; border-radius: 32px; padding: 2rem; box-shadow: 0 20px 35px rgba(0,0,0,0.05); }
-        .gallery { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
-        .main-img { flex: 2; min-width: 250px; }
-        .main-img img { width: 100%; border-radius: 24px; object-fit: cover; max-height: 400px; }
-        .thumb-list { flex: 1; display: flex; flex-direction: column; gap: 0.8rem; }
-        .thumb-list img { width: 100%; border-radius: 16px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-        .thumb-list img:hover { border-color: #f59e0b; }
-        .product-title { font-size: 2rem; margin: 1rem 0 0.5rem; }
-        .price { font-size: 2rem; color: #e67e22; font-weight: bold; margin: 1rem 0; }
-        .short-desc { margin-bottom: 1rem; background: #fef9e3; padding: 1rem; border-radius: 20px; }
-        .specs { background: #f1f5f9; padding: 1.5rem; border-radius: 24px; margin: 1.5rem 0; }
-        .specs h3, .extra-fields h3 { margin-bottom: 1rem; color: #1e293b; }
-        .spec-item { display: flex; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
-        .spec-key { width: 130px; font-weight: bold; }
-        .whatsapp-btn { background: #25D366; color: white; border: none; padding: 1rem 2rem; font-size: 1.2rem; border-radius: 60px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
-        .whatsapp-btn:hover { background: #128C7E; transform: scale(1.01); }
-        .loading-detail { text-align: center; padding: 3rem; font-size: 1.2rem; color: #f59e0b; }
-        @media (max-width: 700px) { .gallery { flex-direction: column; } .thumb-list { flex-direction: row; flex-wrap: wrap; } .thumb-list img { width: 80px; } }
+        body { background: #f8fafc; font-family: 'Cairo', sans-serif; }
+        .navbar { background: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .container { max-width: 1000px; margin: 30px auto; background: white; border-radius: 24px; padding: 25px; }
+        .main-img { width: 100%; max-height: 400px; object-fit: contain; background: #f8fafc; padding: 20px; border-radius: 16px; }
+        .thumb-list { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .thumb-list img { width: 80px; height: 80px; object-fit: cover; border-radius: 12px; cursor: pointer; border: 2px solid #e2e8f0; }
+        .price { font-size: 28px; font-weight: 800; color: #f59e0b; margin: 15px 0; }
+        .specs { background: #f1f5f9; padding: 20px; border-radius: 16px; margin: 20px 0; }
+        .spec-item { display: flex; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+        .spec-key { width: 120px; font-weight: bold; }
+        .whatsapp-btn { background: #25D366; color: white; border: none; width: 100%; padding: 14px; font-size: 18px; font-weight: bold; border-radius: 50px; cursor: pointer; margin-top: 20px; }
+        .back-link { color: #f59e0b; text-decoration: none; }
+        @media (max-width: 700px) { .container { margin: 15px; } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 </head>
 <body>
-<div class="navbar">
-    <div class="logo">🛍️ الدكان | El Dokkan</div>
-    <div class="back-link"><a href="index.html">← العودة للمتجر</a></div>
-</div>
 
-<div class="product-detail" id="productDetail">
-    <div class="loading-detail">📦 جاري تحميل المنتج...</div>
+<div class="navbar">
+    <div class="logo">🛍️ الدكان</div>
+    <a href="index.html" class="back-link">← العودة</a>
 </div>
+<div class="container" id="productContainer">جاري التحميل...</div>
 
 <script>
     const firebaseConfig = {
@@ -51,76 +41,31 @@
         messagingSenderId: "720051498127",
         appId: "1:720051498127:web:eb3d90666c76fb718494fa"
     };
-
     firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const PHONE = "201000621448";
+    const db = firebase.database();
+    const url = new URLSearchParams(window.location.search);
+    const id = url.get('id');
 
-    function getProductById(productId, callback) {
-        database.ref('products/' + productId).once('value', (snapshot) => callback(snapshot.val()));
-    }
-
-    function renderProductPage() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const productId = urlParams.get('id');
-        if (!productId) {
-            document.getElementById('productDetail').innerHTML = '<div style="padding:2rem; text-align:center;">❌ لم يتم تحديد المنتج</div>';
-            return;
-        }
-
-        getProductById(productId, (product) => {
-            if (!product) {
-                document.getElementById('productDetail').innerHTML = '<div style="padding:2rem; text-align:center;">❌ المنتج غير موجود</div>';
-                return;
-            }
-
-            let specsHtml = '';
-            if (product.specs) {
-                for (const [key, value] of Object.entries(product.specs)) {
-                    specsHtml += `<div class="spec-item"><div class="spec-key">${key}:</div><div>${value}</div></div>`;
-                }
-            }
-
-            let extraHtml = '';
-            if (product.extraFields && product.extraFields.length) {
-                extraHtml = `<div class="extra-fields"><h3>📌 معلومات إضافية</h3>`;
-                product.extraFields.forEach(field => {
-                    extraHtml += `<div class="spec-item"><div class="spec-key">${field.fieldName}:</div><div>${field.fieldValue}</div></div>`;
-                });
-                extraHtml += `</div>`;
-            }
-
-            const imagesList = product.images && product.images.length ? product.images : [product.mainImage];
-            let thumbsHtml = imagesList.map(img => `<img src="${img}" onclick="changeMainImage(this.src)" alt="thumb">`).join('');
-
-            const fullHtml = `
-                <div class="gallery">
-                    <div class="main-img">
-                        <img id="mainProductImage" src="${product.mainImage}" alt="${product.name}">
-                    </div>
-                    <div class="thumb-list">
-                        ${thumbsHtml}
-                    </div>
-                </div>
-                <h1 class="product-title">${product.name}</h1>
-                <div class="price">💰 ${product.price} جنيه مصري</div>
-                <div class="short-desc">📝 ${product.shortDesc || 'لا يوجد وصف إضافي'}</div>
-                <div class="specs"><h3>⚙️ المواصفات الأساسية</h3>${specsHtml || '<p>لا توجد مواصفات مسجلة</p>'}</div>
-                ${extraHtml}
-                <button class="whatsapp-btn" onclick="sendToWhatsApp('${product.name.replace(/'/g, "\\'")}', '${product.price}')">
-                    📲 شراء المنتج عبر واتساب
-                </button>
+    if(id) {
+        db.ref('products/' + id).once('value', (snap) => {
+            let p = snap.val();
+            if(!p) { document.getElementById('productContainer').innerHTML = 'منتج غير موجود'; return; }
+            let imagesHtml = `<img class="main-img" id="mainImg" src="${p.mainImage}"><div class="thumb-list">`;
+            if(p.images) p.images.forEach(img => imagesHtml += `<img src="${img}" onclick="document.getElementById('mainImg').src='${img}'">`);
+            imagesHtml += `</div>`;
+            let specsHtml = '<div class="specs">';
+            if(p.specs) for(let [k,v] of Object.entries(p.specs)) specsHtml += `<div class="spec-item"><div class="spec-key">${k}:</div><div>${v}</div></div>`;
+            specsHtml += '</div>';
+            document.getElementById('productContainer').innerHTML = `
+                ${imagesHtml}
+                <h1>${p.name}</h1>
+                <div class="price">${p.price} ج.م</div>
+                <div>${p.shortDesc || ''}</div>
+                ${specsHtml}
+                <button class="whatsapp-btn" onclick="window.open('https://wa.me/201000621448?text=${encodeURIComponent('مرحباً، أرغب في شراء: ' + p.name)}', '_blank')">📲 شراء عبر واتساب</button>
             `;
-            document.getElementById('productDetail').innerHTML = fullHtml;
         });
     }
-
-    window.changeMainImage = function(src) { document.getElementById('mainProductImage').src = src; };
-    window.sendToWhatsApp = function(productName, price) {
-        const message = `مرحباً، أرغب في شراء المنتج: ${productName} بسعر ${price} جنيه. يرجى التواصل لتأكيد التوصيل والدفع عند الاستلام.`;
-        window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(message)}`, '_blank');
-    };
-    document.addEventListener('DOMContentLoaded', renderProductPage);
 </script>
 </body>
 </html>
