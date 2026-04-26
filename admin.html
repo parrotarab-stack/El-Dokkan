@@ -86,7 +86,7 @@
         </div>
         <div class="products-table">
             <h3>📋 قائمة المنتجات</h3>
-            <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>الوصف</th><th>إجراءات</th></tr></thead><tbody id="productsTableBody"><tr><td colspan="6">✨ جاري التحميل...</td></tr></tbody>赶
+            <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>الوصف</th><th>إجراءات</th></tr></thead><tbody id="productsTableBody"><tr><td colspan="6">✨ جاري التحميل...右侧杩</tbody>赶
         </div>
     </div>
 
@@ -96,7 +96,7 @@
             <h3 id="categoryFormTitle">➕ إضافة قسم جديد</h3>
             <input type="hidden" id="editCategoryId">
             <div class="form-group"><label>اسم القسم</label><input type="text" id="catName" placeholder="مثال: إلكترونيات"></div>
-            <div class="form-group"><label>أيقونة القسم (اختر من القائمة)</label>
+            <div class="form-group"><label>أيقونة القسم</label>
                 <select id="catIcon" style="font-size: 24px;">
                     <option value="📱">📱 إلكترونيات</option>
                     <option value="👕">👕 أزياء</option>
@@ -111,13 +111,14 @@
                     <option value="🎵">🎵 موسيقى</option>
                     <option value="✏️">✏️ أدوات</option>
                 </select>
+                <div class="help-text" style="font-size: 12px; color: #64748b; margin-top: 5px;">⭐ اختار الأيقونة من القائمة</div>
             </div>
             <button class="btn" id="saveCategoryBtn">💾 حفظ القسم</button>
             <button class="btn-secondary" id="resetCategoryBtn">🔄 إلغاء</button>
         </div>
         <div class="categories-table">
             <h3>📋 قائمة الأقسام</h3>
-            <table id="categoriesTable"><thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...</td></tr></tbody>表
+            <table id="categoriesTable"><thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></tr></thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...{}--</tbody>表
         </div>
     </div>
 </div>
@@ -175,7 +176,7 @@
                     <button class="edit-btn" onclick="editCategory('${cat.id}')">✏️ تعديل</button>
                     <button class="delete-btn" onclick="deleteCategory('${cat.id}')">🗑️ حذف</button>
                 </td>
-            </table>`;
+            </tr>`;
         });
         tbody.innerHTML = html;
     }
@@ -257,7 +258,7 @@
                     <button class="edit-btn" onclick="editProduct('${key}')">✏️ تعديل</button>
                     <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️ حذف</button>
                 </td>
-            </table>`;
+            </tr>`;
         });
         tbody.innerHTML = html;
     }
@@ -330,6 +331,7 @@
 
     productsRef.on('value', (snap) => { allProducts = snap.val() || {}; renderProductsTable(); renderCategoriesTable(); });
     loadCategories();
+    window.showTab = showTab;
 </script>
 </body>
 </html>
