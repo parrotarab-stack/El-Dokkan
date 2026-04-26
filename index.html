@@ -5,30 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>الدكان | El Dokan</title>
 <style>
-body{font-family:Tahoma;background:#f5f5f5;margin:0}
-header{background:#111;color:#fff;padding:15px;text-align:center;font-size:24px}
+body{font-family:Tajawal,Arial;background:#f5f5f5;margin:0}
+header{background:linear-gradient(45deg,#111,#333);color:#fff;padding:15px;text-align:center;font-size:24px}
 .container{padding:15px}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px}
+
+.topbar{display:flex;gap:10px;margin-bottom:10px}
+input.search,select{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc}
+
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:15px}
 .card{background:#fff;border-radius:12px;padding:10px;cursor:pointer;transition:.3s;box-shadow:0 2px 6px rgba(0,0,0,.1)}
 .card:hover{transform:scale(1.05)}
 .card img{width:100%;height:120px;object-fit:cover;border-radius:8px}
 .price{color:red;font-weight:bold}
-.topbar{display:flex;gap:10px;margin-bottom:10px}
-input.search{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc}
+.badge{background:red;color:#fff;padding:3px 6px;border-radius:6px;font-size:12px}
 
-/* Product Page */
 #productPage{display:none}
 .gallery{display:flex;gap:8px;overflow:auto}
 .gallery img{height:200px;border-radius:10px}
 .btn{background:green;color:#fff;padding:12px;text-align:center;border-radius:8px;display:block;text-decoration:none;margin-top:10px}
 .back{background:#333}
 
-/* Admin */
 #admin{display:none}
 input,textarea{width:100%;margin:5px 0;padding:8px;border-radius:6px;border:1px solid #ccc}
 button{padding:10px;background:black;color:#fff;border:none;margin-top:10px;border-radius:6px}
-.admin-list{margin-top:15px}
-.admin-item{background:#fff;padding:10px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+.admin-item{background:#fff;padding:10px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between}
 .admin-item button{background:red}
 </style>
 </head>
@@ -37,7 +37,14 @@ button{padding:10px;background:black;color:#fff;border:none;margin-top:10px;bord
 
 <div class="container" id="home">
 <div class="topbar">
-<input class="search" placeholder="ابحث عن منتج..." oninput="searchProducts(this.value)">
+<input class="search" placeholder="ابحث..." oninput="searchProducts(this.value)">
+<select onchange="filterCategory(this.value)">
+<option value="">كل الأقسام</option>
+<option>أدوات مدرسية</option>
+<option>كهرباء</option>
+<option>إضاءة</option>
+<option>بطاريات</option>
+</select>
 </div>
 <div class="products" id="productList"></div>
 </div>
@@ -55,11 +62,18 @@ button{padding:10px;background:black;color:#fff;border:none;margin-top:10px;bord
 <h2>لوحة التحكم</h2>
 <input id="name" placeholder="اسم المنتج">
 <input id="price" placeholder="السعر">
+<select id="cat">
+<option>أدوات مدرسية</option>
+<option>كهرباء</option>
+<option>إضاءة</option>
+<option>بطاريات</option>
+</select>
 <textarea id="desc" placeholder="الوصف"></textarea>
 <input type="file" id="imgFile">
+<label><input type="checkbox" id="featured"> منتج مميز</label>
 <button onclick="addProduct()">إضافة منتج</button>
 
-<div class="admin-list" id="adminList"></div>
+<div id="adminList"></div>
 </div>
 
 <script>
@@ -72,6 +86,7 @@ let list=document.getElementById('productList');
 list.innerHTML='';
 listData.forEach((p,i)=>{
 list.innerHTML+=`<div class='card' onclick='openProduct(${i})'>
+${p.featured?"<span class='badge'>🔥 مميز</span>":""}
 <img src='${p.imgs[0]}'>
 <h4>${p.name}</h4>
 <p class='price'>${p.price} جنيه</p>
@@ -84,65 +99,64 @@ let p=products[i];
 document.getElementById('home').style.display='none';
 document.getElementById('productPage').style.display='block';
 
-document.getElementById('pName').innerText=p.name;
-document.getElementById('pImages').innerHTML=p.imgs.map(img=>`<img src='${img}'>`).join('');
-document.getElementById('pDesc').innerText=p.desc;
-document.getElementById('pPrice').innerText=p.price+' جنيه';
+pName.innerText=p.name;
+pImages.innerHTML=p.imgs.map(img=>`<img src='${img}'>`).join('');
+pDesc.innerText=p.desc;
+pPrice.innerText=p.price+' جنيه';
 
-let msg=encodeURIComponent(`عاوز المنتج: ${p.name} - السعر: ${p.price}`);
-document.getElementById('whatsappBtn').href=`https://wa.me/201000621448?text=${msg}`;
+let msg=encodeURIComponent(`عاوز المنتج: ${p.name}\nالسعر: ${p.price}`);
+whatsappBtn.href=`https://wa.me/201000621448?text=${msg}`;
 }
 
 function goHome(){
-document.getElementById('home').style.display='block';
-document.getElementById('productPage').style.display='none';
+home.style.display='block';
+productPage.style.display='none';
 }
 
 function addProduct(){
-let file=document.getElementById('imgFile').files[0];
+let file=imgFile.files[0];
 if(!file){alert('اختار صورة');return}
 let reader=new FileReader();
 reader.onload=function(){
-let p={
+products.push({
 name:name.value,
 price:price.value,
 desc:desc.value,
+cat:cat.value,
+featured:featured.checked,
 imgs:[reader.result]
-};
-products.push(p);
+});
 save();
 alert('تم الإضافة');
 }
 reader.readAsDataURL(file);
 }
 
-function deleteProduct(i){
-products.splice(i,1);
-save();
-}
+function deleteProduct(i){products.splice(i,1);save();}
 
 function renderAdmin(){
-let box=document.getElementById('adminList');
-box.innerHTML='';
+adminList.innerHTML='';
 products.forEach((p,i)=>{
-box.innerHTML+=`<div class='admin-item'>${p.name}<button onclick='deleteProduct(${i})'>حذف</button></div>`;
+adminList.innerHTML+=`<div class='admin-item'>${p.name}<button onclick='deleteProduct(${i})'>حذف</button></div>`;
 });
 }
 
 function searchProducts(q){
-let f=products.filter(p=>p.name.includes(q));
-render(f);
+render(products.filter(p=>p.name.includes(q)));
+}
+
+function filterCategory(c){
+if(!c)return render();
+render(products.filter(p=>p.cat==c));
 }
 
 render();
 renderAdmin();
 
-// admin access
 if(location.hash=='#admin'){
-document.getElementById('home').style.display='none';
-document.getElementById('admin').style.display='block';
+home.style.display='none';
+admin.style.display='block';
 }
 </script>
-
 </body>
 </html>
