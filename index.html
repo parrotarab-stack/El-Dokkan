@@ -1,162 +1,53 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الدكان | El Dokan</title>
-<style>
-body{font-family:Tajawal,Arial;background:#f5f5f5;margin:0}
-header{background:linear-gradient(45deg,#111,#333);color:#fff;padding:15px;text-align:center;font-size:24px}
-.container{padding:15px}
-
-.topbar{display:flex;gap:10px;margin-bottom:10px}
-input.search,select{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc}
-
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:15px}
-.card{background:#fff;border-radius:12px;padding:10px;cursor:pointer;transition:.3s;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-.card:hover{transform:scale(1.05)}
-.card img{width:100%;height:120px;object-fit:cover;border-radius:8px}
-.price{color:red;font-weight:bold}
-.badge{background:red;color:#fff;padding:3px 6px;border-radius:6px;font-size:12px}
-
-#productPage{display:none}
-.gallery{display:flex;gap:8px;overflow:auto}
-.gallery img{height:200px;border-radius:10px}
-.btn{background:green;color:#fff;padding:12px;text-align:center;border-radius:8px;display:block;text-decoration:none;margin-top:10px}
-.back{background:#333}
-
-#admin{display:none}
-input,textarea{width:100%;margin:5px 0;padding:8px;border-radius:6px;border:1px solid #ccc}
-button{padding:10px;background:black;color:#fff;border:none;margin-top:10px;border-radius:6px}
-.admin-item{background:#fff;padding:10px;margin-bottom:8px;border-radius:8px;display:flex;justify-content:space-between}
-.admin-item button{background:red}
-</style>
+    <meta charset="UTF-8">
+    <title>الدكان</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: Arial; background: #f5f7fb; padding: 20px; }
+        .product { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; border: 1px solid #ddd; }
+        img { max-width: 100%; height: 150px; object-fit: contain; }
+        button { background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; margin-top: 10px; }
+        .container { max-width: 800px; margin: auto; }
+        .admin-link { display: inline-block; margin-top: 20px; background: #0f172a; color: white; padding: 10px 20px; text-decoration: none; border-radius: 50px; }
+        h1 { color: #0f172a; }
+    </style>
 </head>
 <body>
-<header>الدكان | El Dokan</header>
-
-<div class="container" id="home">
-<div class="topbar">
-<input class="search" placeholder="ابحث..." oninput="searchProducts(this.value)">
-<select onchange="filterCategory(this.value)">
-<option value="">كل الأقسام</option>
-<option>أدوات مدرسية</option>
-<option>كهرباء</option>
-<option>إضاءة</option>
-<option>بطاريات</option>
-</select>
+<div class="container">
+    <h1>🛍️ الدكان</h1>
+    <div id="products"></div>
+    <a href="admin.html" class="admin-link">📦 لوحة التحكم</a>
 </div>
-<div class="products" id="productList"></div>
-</div>
-
-<div class="container" id="productPage">
-<button class="btn back" onclick="goHome()">رجوع</button>
-<h2 id="pName"></h2>
-<div class="gallery" id="pImages"></div>
-<p id="pDesc"></p>
-<p class="price" id="pPrice"></p>
-<a id="whatsappBtn" class="btn" target="_blank">اطلب عبر واتساب</a>
-</div>
-
-<div class="container" id="admin">
-<h2>لوحة التحكم</h2>
-<input id="name" placeholder="اسم المنتج">
-<input id="price" placeholder="السعر">
-<select id="cat">
-<option>أدوات مدرسية</option>
-<option>كهرباء</option>
-<option>إضاءة</option>
-<option>بطاريات</option>
-</select>
-<textarea id="desc" placeholder="الوصف"></textarea>
-<input type="file" id="imgFile">
-<label><input type="checkbox" id="featured"> منتج مميز</label>
-<button onclick="addProduct()">إضافة منتج</button>
-
-<div id="adminList"></div>
-</div>
-
 <script>
-let products = JSON.parse(localStorage.getItem('products')||'[]');
-
-function save(){localStorage.setItem('products',JSON.stringify(products));render();renderAdmin();}
-
-function render(listData=products){
-let list=document.getElementById('productList');
-list.innerHTML='';
-listData.forEach((p,i)=>{
-list.innerHTML+=`<div class='card' onclick='openProduct(${i})'>
-${p.featured?"<span class='badge'>🔥 مميز</span>":""}
-<img src='${p.imgs[0]}'>
-<h4>${p.name}</h4>
-<p class='price'>${p.price} جنيه</p>
-</div>`;
-});
-}
-
-function openProduct(i){
-let p=products[i];
-document.getElementById('home').style.display='none';
-document.getElementById('productPage').style.display='block';
-
-pName.innerText=p.name;
-pImages.innerHTML=p.imgs.map(img=>`<img src='${img}'>`).join('');
-pDesc.innerText=p.desc;
-pPrice.innerText=p.price+' جنيه';
-
-let msg=encodeURIComponent(`عاوز المنتج: ${p.name}\nالسعر: ${p.price}`);
-whatsappBtn.href=`https://wa.me/201000621448?text=${msg}`;
-}
-
-function goHome(){
-home.style.display='block';
-productPage.style.display='none';
-}
-
-function addProduct(){
-let file=imgFile.files[0];
-if(!file){alert('اختار صورة');return}
-let reader=new FileReader();
-reader.onload=function(){
-products.push({
-name:name.value,
-price:price.value,
-desc:desc.value,
-cat:cat.value,
-featured:featured.checked,
-imgs:[reader.result]
-});
-save();
-alert('تم الإضافة');
-}
-reader.readAsDataURL(file);
-}
-
-function deleteProduct(i){products.splice(i,1);save();}
-
-function renderAdmin(){
-adminList.innerHTML='';
-products.forEach((p,i)=>{
-adminList.innerHTML+=`<div class='admin-item'>${p.name}<button onclick='deleteProduct(${i})'>حذف</button></div>`;
-});
-}
-
-function searchProducts(q){
-render(products.filter(p=>p.name.includes(q)));
-}
-
-function filterCategory(c){
-if(!c)return render();
-render(products.filter(p=>p.cat==c));
-}
-
-render();
-renderAdmin();
-
-if(location.hash=='#admin'){
-home.style.display='none';
-admin.style.display='block';
-}
+    const firebaseConfig = {
+        apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
+        authDomain: "el-dokkan-abc4e.firebaseapp.com",
+        databaseURL: "https://el-dokkan-abc4e-default-rtdb.firebaseio.com",
+        projectId: "el-dokkan-abc4e",
+        storageBucket: "el-dokkan-abc4e.firebasestorage.app",
+        messagingSenderId: "720051498127",
+        appId: "1:720051498127:web:eb3d90666c76fb718494fa"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    db.ref('products').on('value', (snap) => {
+        let data = snap.val();
+        let html = '';
+        if(data) {
+            for(let id in data) {
+                html += `<div class="product">
+                            <img src="${data[id].mainImage}" onerror="this.src='https://via.placeholder.com/150'">
+                            <h3>${data[id].name}</h3>
+                            <p>💰 ${data[id].price} ج.م</p>
+                            <button onclick="window.open('https://wa.me/201000621448?text=${encodeURIComponent('أريد شراء: ' + data[id].name)}', '_blank')">📲 شراء</button>
+                         </div>`;
+            }
+        } else { html = '<p>لا توجد منتجات</p>'; }
+        document.getElementById('products').innerHTML = html;
+    });
 </script>
 </body>
 </html>
