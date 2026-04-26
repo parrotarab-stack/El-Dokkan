@@ -4,26 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - الدكان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f0f4f8; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: #1e293b; color: white; padding: 15px 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .header h2 { font-size: 1.4rem; }
-        .btn-logout { background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; }
-        .btn-save { background: #f59e0b; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: bold; color: #1e293b; }
-        .btn-secondary { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; }
-        .form-card { background: white; border-radius: 24px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .form-group { margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; color: #1e293b; }
-        input, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 12px; }
-        table { width: 100%; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-collapse: collapse; }
-        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0; }
-        .edit-btn { background: #3b82f6; color: white; border: none; padding: 4px 12px; border-radius: 20px; cursor: pointer; }
-        .delete-btn { background: #ef4444; color: white; border: none; padding: 4px 12px; border-radius: 20px; cursor: pointer; margin-right: 5px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { background: #eef2ff; padding: 20px; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: #0f172a; color: white; padding: 15px 25px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; }
+        .btn { background: #f59e0b; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: bold; color: #0f172a; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .form-card { background: white; border-radius: 24px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 18px; }
+        label { font-weight: bold; display: block; margin-bottom: 6px; color: #0f172a; }
+        input, select { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 12px; }
+        .products-table, .categories-table { background: white; border-radius: 24px; padding: 20px; overflow-x: auto; margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: right; padding: 12px; border-bottom: 1px solid #e2e8f0; }
+        .edit-btn { background: #3b82f6; color: white; border: none; padding: 5px 12px; border-radius: 20px; cursor: pointer; margin: 3px; }
+        .delete-btn { background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
         .small-img { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; background: #f1f5f9; }
+        .logout-btn { background: #dc2626; color: white; border: none; padding: 8px 18px; border-radius: 30px; cursor: pointer; }
+        .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #0f172a; border-right: 4px solid #f59e0b; padding-right: 12px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: #e2e8f0; border: none; padding: 10px 25px; border-radius: 40px; cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: #f59e0b; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         .msg { background: #dcfce7; color: #166534; padding: 10px; border-radius: 12px; margin-bottom: 15px; display: none; }
-        @media (max-width: 700px) { th, td { font-size: 12px; padding: 8px; } }
+        @media (max-width: 700px) { th, td { font-size: 12px; padding: 6px; } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -31,59 +40,76 @@
 <body>
 
 <script>
-    // حماية لوحة التحكم بكلمة مرور
+    // حماية لوحة التحكم
     const ADMIN_USER = "admin";
     const ADMIN_PASS = "dokkan2025";
     if (!sessionStorage.getItem('adminAuth')) {
         let u = prompt("اسم المستخدم:");
         let p = prompt("كلمة المرور:");
-        if (u === ADMIN_USER && p === ADMIN_PASS) {
-            sessionStorage.setItem('adminAuth', 'true');
-        } else {
-            alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة!");
-            window.location.href = "index.html";
-        }
+        if (u === ADMIN_USER && p === ADMIN_PASS) sessionStorage.setItem('adminAuth', 'true');
+        else { alert("خطأ"); window.location.href = "index.html"; }
     }
-    function logout() { sessionStorage.clear(); window.location.href = "index.html"; }
+    function logout() { sessionStorage.clear(); location.reload(); }
+
+    function showMessage(msg, isError = false) {
+        let m = document.getElementById('globalMsg');
+        m.innerText = msg;
+        m.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
+        m.style.color = isError ? '#991b1b' : '#166534';
+        m.style.display = 'block';
+        setTimeout(() => m.style.display = 'none', 3000);
+    }
 </script>
 
 <div class="container">
     <div class="header">
         <h2>⚙️ لوحة تحكم الدكان</h2>
-        <div>
-            <button onclick="logout()" class="btn-logout">🚪 تسجيل الخروج</button>
-            <a href="index.html" style="color:white; margin-right:10px;">← عرض المتجر</a>
+        <div><button onclick="logout()" class="logout-btn">🚪 خروج</button> <a href="index.html" style="color:white;">← المتجر</a></div>
+    </div>
+    <div id="globalMsg" class="msg"></div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('products')">📦 المنتجات</button>
+        <button class="tab-btn" onclick="showTab('categories')">🏷️ الأقسام (كاتوجوريات)</button>
+    </div>
+
+    <!-- ================= تبويب المنتجات ================= -->
+    <div id="productsTab" class="tab-content active">
+        <div class="form-card">
+            <h3 id="productFormTitle">➕ إضافة منتج جديد</h3>
+            <input type="hidden" id="editProductId">
+            <div class="form-group"><label>اسم المنتج *</label><input type="text" id="prodName" placeholder="مثال: سماعة بلوتوث"></div>
+            <div class="form-group"><label>السعر (جنيه) *</label><input type="number" id="prodPrice" placeholder="السعر"></div>
+            <div class="form-group"><label>القسم *</label><select id="prodCategory"></select></div>
+            <div class="form-group"><label>وصف مختصر</label><input type="text" id="prodShortDesc" placeholder="وصف سريع"></div>
+            <div class="form-group"><label>🔗 رابط الصورة الرئيسية *</label><input type="text" id="prodMainImage" placeholder="https://i.ibb.co/xxxxx.jpg"></div>
+            <div class="form-group"><label>🔗 روابط صور إضافية (فاصلة)</label><input type="text" id="prodExtraImages" placeholder="رابط1, رابط2"></div>
+            <button class="btn" id="saveProductBtn">💾 حفظ المنتج</button>
+            <button class="btn-secondary" id="resetProductBtn">🔄 إلغاء</button>
+        </div>
+        <div class="products-table">
+            <h3>📋 قائمة المنتجات</h3>
+            <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>المواصفات</th><th>إجراءات</th></tr></thead><tbody id="productsTableBody"><tr><td colspan="6">✨ جاري التحميل...</td></tr></tbody></table>
         </div>
     </div>
 
-    <div id="msg" class="msg"></div>
-
-    <div class="form-card">
-        <h3 id="formTitle">➕ إضافة منتج جديد</h3>
-        <input type="hidden" id="editId">
-        <div class="form-group"><label>اسم المنتج *</label><input type="text" id="name" placeholder="مثال: سماعة بلوتوث"></div>
-        <div class="form-group"><label>السعر (جنيه) *</label><input type="number" id="price" placeholder="السعر"></div>
-        <div class="form-group"><label>وصف مختصر</label><input type="text" id="shortDesc" placeholder="وصف سريع للمنتج"></div>
-        <div class="form-group"><label>🔗 رابط الصورة الرئيسية *</label><input type="text" id="mainImage" placeholder="https://i.ibb.co/xxxxx.jpg"></div>
-        <div class="form-group"><label>🔗 روابط صور إضافية (فاصلة)</label><input type="text" id="extraImages" placeholder="رابط1, رابط2, رابط3"></div>
-        <div>
-            <button class="btn-save" id="saveBtn">💾 حفظ المنتج</button>
-            <button class="btn-secondary" id="resetBtn">🔄 إلغاء</button>
+    <!-- ================= تبويب الأقسام ================= -->
+    <div id="categoriesTab" class="tab-content">
+        <div class="form-card">
+            <h3>➕ إضافة قسم جديد</h3>
+            <div class="form-group"><label>اسم القسم</label><input type="text" id="newCatName" placeholder="مثال: إلكترونيات"></div>
+            <div class="form-group"><label>أيقونة القسم</label><input type="text" id="newCatIcon" placeholder="📱" value="📦"></div>
+            <button class="btn" id="addCategoryBtn">➕ إضافة القسم</button>
         </div>
-    </div>
-
-    <div class="form-card">
-        <h3>📋 قائمة المنتجات</h3>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>الوصف</th><th>إجراءات</th></tr></thead>
-                <tbody id="tableBody"><tr><td colspan="5">✨ جاري التحميل...</td></tr></tbody>
-            </table>
+        <div class="categories-table">
+            <h3>📋 قائمة الأقسام</h3>
+            <table id="categoriesTable"><thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></tr></thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...</td></tr></tbody></table>
         </div>
     </div>
 </div>
 
 <script>
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
         authDomain: "el-dokkan-abc4e.firebaseapp.com",
@@ -96,113 +122,143 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const productsRef = db.ref('products');
+    const categoriesRef = db.ref('categories');
 
     let allProducts = {};
+    let allCategories = {};
 
-    function showMessage(text, isError = false) {
-        let m = document.getElementById('msg');
-        m.innerText = text;
-        m.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
-        m.style.color = isError ? '#991b1b' : '#166534';
-        m.style.display = 'block';
-        setTimeout(() => m.style.display = 'none', 3000);
+    // ========== دوال الأقسام ==========
+    function loadCategories() {
+        categoriesRef.on('value', (snap) => {
+            allCategories = snap.val() || {};
+            if (Object.keys(allCategories).length === 0) {
+                const defaultCats = {
+                    electronics: { name: "إلكترونيات", icon: "📱" },
+                    fashion: { name: "أزياء", icon: "👕" },
+                    books: { name: "كتب", icon: "📚" },
+                    home: { name: "منزل", icon: "🏠" }
+                };
+                categoriesRef.set(defaultCats);
+                allCategories = defaultCats;
+            }
+            renderCategoriesTable();
+            updateCategorySelect();
+        });
     }
 
-    function renderTable() {
-        let tbody = document.getElementById('tableBody');
-        let keys = Object.keys(allProducts);
-        if (keys.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">📭 لا توجد منتجات. أضف منتجك الأول</td></tr>';
-            return;
-        }
+    function renderCategoriesTable() {
+        const tbody = document.getElementById('categoriesTableBody');
+        if (!tbody) return;
+        const cats = Object.keys(allCategories).map(key => ({ id: key, ...allCategories[key] }));
+        if (cats.length === 0) { tbody.innerHTML = '<tr><td colspan="4">لا توجد أقسام</td></tr>'; return; }
         let html = '';
-        keys.forEach(key => {
-            let p = allProducts[key];
-            html += `<tr>
-                        <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50?text=No'"></td>
-                        <td>${escapeHtml(p.name)}</td>
-                        <td>${p.price} ج.م</td>
-                        <td>${escapeHtml(p.shortDesc || '').substring(0, 40)}</td>
-                        <td>
-                            <button class="edit-btn" onclick="editProduct('${key}')">✏️ تعديل</button>
-                            <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️ حذف</button>
-                        </td>
-                    </tr>`;
+        cats.forEach(cat => {
+            let productCount = Object.values(allProducts).filter(p => p.category === cat.id).length;
+            html += `<tr><td style="font-size:24px">${cat.icon}</td><td><strong>${cat.name}</strong></td><td>${productCount} منتج</td><td><button class="edit-btn" onclick="editCategory('${cat.id}')">✏️</button> <button class="delete-btn" onclick="deleteCategory('${cat.id}')">🗑️</button></td></tr>`;
         });
         tbody.innerHTML = html;
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
+    function updateCategorySelect() {
+        const select = document.getElementById('prodCategory');
+        select.innerHTML = '<option value="">-- اختر القسم --</option>';
+        Object.keys(allCategories).forEach(key => {
+            select.innerHTML += `<option value="${key}">${allCategories[key].icon} ${allCategories[key].name}</option>`;
         });
     }
 
-    window.editProduct = function(id) {
-        let p = allProducts[id];
-        if (!p) return;
-        document.getElementById('editId').value = id;
-        document.getElementById('name').value = p.name;
-        document.getElementById('price').value = p.price;
-        document.getElementById('shortDesc').value = p.shortDesc || '';
-        document.getElementById('mainImage').value = p.mainImage || '';
-        let extra = (p.images || []).filter(i => i !== p.mainImage).join(',');
-        document.getElementById('extraImages').value = extra;
-        document.getElementById('formTitle').innerHTML = '✏️ تعديل المنتج';
+    document.getElementById('addCategoryBtn').onclick = () => {
+        let name = document.getElementById('newCatName').value.trim();
+        let icon = document.getElementById('newCatIcon').value.trim() || "📦";
+        if (!name) { showMessage("اكتب اسم القسم", true); return; }
+        categoriesRef.push({ name, icon }).then(() => {
+            showMessage("✅ تم إضافة القسم");
+            document.getElementById('newCatName').value = '';
+        });
     };
 
-    window.deleteProduct = function(id) {
-        if (confirm("⚠️ هل أنت متأكد من حذف هذا المنتج نهائياً؟")) {
-            productsRef.child(id).remove().then(() => showMessage("✅ تم حذف المنتج"));
-        }
+    window.editCategory = (id) => {
+        let newName = prompt("الاسم الجديد:", allCategories[id]?.name);
+        if (newName) categoriesRef.child(id).update({ name: newName });
+    };
+    window.deleteCategory = (id) => {
+        let count = Object.values(allProducts).filter(p => p.category === id).length;
+        if (count > 0) { showMessage(`لا يمكن حذف القسم وفيه ${count} منتج`, true); return; }
+        if (confirm("حذف القسم؟")) categoriesRef.child(id).remove();
     };
 
-    function resetForm() {
-        document.getElementById('editId').value = '';
-        document.getElementById('name').value = '';
-        document.getElementById('price').value = '';
-        document.getElementById('shortDesc').value = '';
-        document.getElementById('mainImage').value = '';
-        document.getElementById('extraImages').value = '';
-        document.getElementById('formTitle').innerHTML = '➕ إضافة منتج جديد';
+    // ========== دوال المنتجات ==========
+    function renderProductsTable() {
+        const tbody = document.getElementById('productsTableBody');
+        const keys = Object.keys(allProducts);
+        if (keys.length === 0) { tbody.innerHTML = '<tr><td colspan="6">لا توجد منتجات</td></tr>'; return; }
+        let html = '';
+        keys.forEach(key => {
+            let p = allProducts[key];
+            let cat = allCategories[p.category] || { name: "بدون", icon: "❓" };
+            html += `<tr>
+                        <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50'"></td>
+                        <td>${p.name}</td>
+                        <td>${p.price} ج.م</td>
+                        <td>${cat.icon} ${cat.name}</td>
+                        <td>${(p.shortDesc || '').substring(0, 30)}</td>
+                        <td><button class="edit-btn" onclick="editProduct('${key}')">✏️</button> <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️</button></td>
+                     </tr>`;
+        });
+        tbody.innerHTML = html;
     }
 
-    document.getElementById('saveBtn').onclick = function() {
-        let id = document.getElementById('editId').value;
-        let name = document.getElementById('name').value.trim();
-        let price = document.getElementById('price').value.trim();
-        let shortDesc = document.getElementById('shortDesc').value.trim();
-        let mainImage = document.getElementById('mainImage').value.trim();
-        let extraRaw = document.getElementById('extraImages').value.trim();
+    document.getElementById('saveProductBtn').onclick = () => {
+        let id = document.getElementById('editProductId').value;
+        let name = document.getElementById('prodName').value.trim();
+        let price = document.getElementById('prodPrice').value.trim();
+        let category = document.getElementById('prodCategory').value;
+        let shortDesc = document.getElementById('prodShortDesc').value.trim();
+        let mainImage = document.getElementById('prodMainImage').value.trim();
+        let extraRaw = document.getElementById('prodExtraImages').value.trim();
         let images = extraRaw ? extraRaw.split(',').map(s => s.trim()) : [];
         if (mainImage && !images.includes(mainImage)) images.unshift(mainImage);
-        if (!name || !price || !mainImage) {
-            showMessage("❌ يرجى ملء الاسم والسعر والصورة الرئيسية", true);
-            return;
-        }
-        let productData = { name, price, shortDesc, mainImage, images };
-        if (id) {
-            productsRef.child(id).update(productData).then(() => {
-                showMessage("✅ تم تعديل المنتج");
-                resetForm();
-            }).catch(err => showMessage("❌ خطأ: " + err.message, true));
-        } else {
-            productsRef.push(productData).then(() => {
-                showMessage("✅ تمت إضافة المنتج");
-                resetForm();
-            }).catch(err => showMessage("❌ خطأ: " + err.message, true));
-        }
+        if (!name || !price || !mainImage) { showMessage("املأ الاسم والسعر والصورة", true); return; }
+        if (!category) { showMessage("اختر القسم", true); return; }
+        let data = { name, price, category, shortDesc, mainImage, images };
+        if (id) { productsRef.child(id).update(data).then(() => { showMessage("تم التعديل"); resetProductForm(); }); } 
+        else { productsRef.push(data).then(() => { showMessage("تمت الإضافة"); resetProductForm(); }); }
     };
-    document.getElementById('resetBtn').onclick = resetForm;
 
-    productsRef.on('value', (snap) => {
-        allProducts = snap.val() || {};
-        renderTable();
-    });
+    window.editProduct = (id) => {
+        let p = allProducts[id];
+        document.getElementById('editProductId').value = id;
+        document.getElementById('prodName').value = p.name;
+        document.getElementById('prodPrice').value = p.price;
+        document.getElementById('prodCategory').value = p.category || "";
+        document.getElementById('prodShortDesc').value = p.shortDesc || '';
+        document.getElementById('prodMainImage').value = p.mainImage || '';
+        document.getElementById('prodExtraImages').value = (p.images || []).filter(i => i !== p.mainImage).join(',');
+        document.getElementById('productFormTitle').innerText = '✏️ تعديل المنتج';
+    };
+
+    window.deleteProduct = (id) => { if (confirm("حذف؟")) productsRef.child(id).remove(); };
+    function resetProductForm() {
+        document.getElementById('editProductId').value = '';
+        document.getElementById('prodName').value = '';
+        document.getElementById('prodPrice').value = '';
+        document.getElementById('prodShortDesc').value = '';
+        document.getElementById('prodMainImage').value = '';
+        document.getElementById('prodExtraImages').value = '';
+        document.getElementById('productFormTitle').innerText = '➕ إضافة منتج جديد';
+    }
+    document.getElementById('resetProductBtn').onclick = resetProductForm;
+
+    // ========== عرض التبويبات ==========
+    function showTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if (tab === 'products') { document.getElementById('productsTab').classList.add('active'); document.querySelector('.tab-btn:first-child').classList.add('active'); } 
+        else { document.getElementById('categoriesTab').classList.add('active'); document.querySelector('.tab-btn:last-child').classList.add('active'); }
+    }
+
+    productsRef.on('value', (snap) => { allProducts = snap.val() || {}; renderProductsTable(); renderCategoriesTable(); });
+    loadCategories();
 </script>
 </body>
 </html>
