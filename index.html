@@ -3,27 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الدكان | متجرك الإلكتروني</title>
+    <title>الدكان - متجرك الإلكتروني</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); }
-        .header { background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .logo h1 { font-size: 1.8rem; background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .admin-link a { background: #f59e0b; color: #1e293b; padding: 6px 18px; border-radius: 50px; text-decoration: none; font-weight: bold; transition: 0.3s; }
-        .search-box { padding: 15px 20px; max-width: 600px; margin: 15px auto; }
-        .search-box input { width: 100%; padding: 14px 20px; border: 2px solid #e2e8f0; border-radius: 60px; font-size: 16px; outline: none; transition: 0.3s; background: white; }
-        .search-box input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 10px 20px 40px; max-width: 1400px; margin: 0 auto; }
-        .product-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); transition: all 0.3s ease; cursor: pointer; border: 1px solid rgba(0,0,0,0.05); }
-        .product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 30px rgba(0,0,0,0.12); }
-        .product-img { width: 100%; height: 170px; object-fit: contain; background: #f8fafc; padding: 15px; transition: transform 0.3s ease; }
-        .product-card:hover .product-img { transform: scale(1.03); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { background: #f5f7fb; }
+        .header { background: #0f172a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 24px; font-weight: 800; }
+        .logo span { color: #f59e0b; }
+        .admin-btn { background: #f59e0b; color: #0f172a; padding: 8px 20px; border-radius: 40px; text-decoration: none; font-weight: 600; }
+        .search-box { padding: 15px 20px; max-width: 600px; margin: 10px auto; }
+        .search-box input { width: 100%; padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 50px; font-size: 16px; outline: none; }
+        .search-box input:focus { border-color: #f59e0b; }
+        .categories-bar { background: white; padding: 12px 20px; display: flex; gap: 20px; overflow-x: auto; border-bottom: 1px solid #e2e8f0; }
+        .cat-link { text-decoration: none; color: #475569; font-weight: 600; white-space: nowrap; cursor: pointer; padding: 4px 0; border-bottom: 2px solid transparent; }
+        .cat-link.active { color: #f59e0b; border-bottom-color: #f59e0b; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        .product-card { background: white; border-radius: 16px; overflow: hidden; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
+        .product-img { width: 100%; height: 170px; object-fit: contain; background: #f8fafc; padding: 15px; }
         .product-info { padding: 12px; }
-        .product-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: #1e293b; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-        .product-price { font-size: 1.2rem; font-weight: 800; color: #f59e0b; margin: 5px 0; }
-        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25D366; color: white; border-radius: 50px; padding: 10px 18px; display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 15px rgba(37,211,102,0.3); z-index: 99; font-size: 14px; }
-        footer { text-align: center; padding: 25px; background: #0f172a; color: #94a3b8; margin-top: 20px; font-size: 13px; }
-        .empty-state { text-align: center; padding: 60px; color: #64748b; grid-column: 1 / -1; font-size: 1.1rem; }
+        .product-title { font-weight: 700; margin-bottom: 5px; }
+        .product-price { font-size: 18px; font-weight: 800; color: #f59e0b; }
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25D366; color: white; padding: 10px 18px; border-radius: 50px; display: flex; gap: 8px; text-decoration: none; font-weight: bold; z-index: 99; }
+        footer { text-align: center; padding: 25px; background: #0f172a; color: #94a3b8; margin-top: 30px; }
+        .empty-state { text-align: center; padding: 60px; color: #64748b; grid-column: 1 / -1; }
         @media (max-width: 640px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; } .product-img { height: 130px; } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -32,18 +36,16 @@
 <body>
 
 <div class="header">
-    <div class="logo"><h1>🛍️ الدكان</h1></div>
-    <div class="admin-link"><a href="admin.html">📦 لوحة التحكم</a></div>
+    <div class="logo">الد<span>ك</span>ان</div>
+    <a href="admin.html" class="admin-btn">📦 لوحة التحكم</a>
 </div>
 
+<div class="categories-bar" id="categoriesContainer">✨ جاري تحميل الأقسام...</div>
 <div class="search-box"><input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..."></div>
+<div class="products-grid" id="productsContainer">✨ جاري تحميل المنتجات...</div>
 
-<div class="products-grid" id="productsContainer">
-    <div class="empty-state">✨ جاري تحميل المنتجات...</div>
-</div>
-
-<footer><p>الدكان - جميع الحقوق محفوظة © 2025 | الدفع عند الاستلام | تواصل واتساب: 01000621448</p></footer>
-<a href="https://wa.me/201000621448" target="_blank" class="whatsapp-float">📱 واتساب</a>
+<footer><p>الدكان | الدفع عند الاستلام | واتساب: 01000621448</p></footer>
+<a href="https://wa.me/201000621448" class="whatsapp-float">📱 واتساب</a>
 
 <script>
     const firebaseConfig = {
@@ -59,51 +61,46 @@
     const db = firebase.database();
 
     let allProducts = [];
+    let allCategories = {};
+    let currentCategory = 'all';
 
-    function renderProducts(products) {
+    function renderCategories() {
+        const container = document.getElementById('categoriesContainer');
+        let catsArray = Object.keys(allCategories).map(k => ({ id: k, ...allCategories[k] }));
+        if (catsArray.length === 0) { container.innerHTML = '<div>لا توجد أقسام</div>'; return; }
+        let html = `<div class="cat-link ${currentCategory === 'all' ? 'active' : ''}" data-cat="all">🔥 الكل</div>`;
+        catsArray.forEach(c => { html += `<div class="cat-link ${currentCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${c.icon} ${c.name}</div>`; });
+        container.innerHTML = html;
+        document.querySelectorAll('.cat-link').forEach(el => {
+            el.addEventListener('click', () => {
+                currentCategory = el.getAttribute('data-cat');
+                renderCategories();
+                filterAndRender();
+            });
+        });
+    }
+
+    function filterAndRender() {
+        let filtered = [...allProducts];
+        if (currentCategory !== 'all') filtered = filtered.filter(p => p.category === currentCategory);
+        let search = document.getElementById('searchInput').value.toLowerCase();
+        if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.shortDesc && p.shortDesc.toLowerCase().includes(search)));
         const container = document.getElementById('productsContainer');
-        if (!products || products.length === 0) {
-            container.innerHTML = '<div class="empty-state">📭 لا توجد منتجات حالياً - أضف منتجك الأول</div>';
-            return;
-        }
-        container.innerHTML = products.map(p => `
+        if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">📭 لا توجد منتجات</div>'; return; }
+        container.innerHTML = filtered.map(p => `
             <div class="product-card" onclick="window.location.href='product.html?id=${p.id}'">
-                <img class="product-img" src="${p.mainImage || 'https://placehold.co/300x300?text=Product'}" loading="lazy" onerror="this.src='https://placehold.co/300x300?text=Error'">
+                <img class="product-img" src="${p.mainImage}" loading="lazy" onerror="this.src='https://placehold.co/300x300'">
                 <div class="product-info">
-                    <div class="product-title">${escapeHtml(p.name)}</div>
+                    <div class="product-title">${p.name}</div>
                     <div class="product-price">${p.price} ج.م</div>
                 </div>
             </div>
         `).join('');
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    db.ref('products').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            allProducts = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-            renderProducts(allProducts);
-        } else {
-            allProducts = [];
-            renderProducts([]);
-        }
-    });
-
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase().trim();
-        if (!term) return renderProducts(allProducts);
-        const filtered = allProducts.filter(p => (p.name && p.name.toLowerCase().includes(term)) || (p.shortDesc && p.shortDesc.toLowerCase().includes(term)));
-        renderProducts(filtered);
-    });
+    db.ref('categories').on('value', (snap) => { allCategories = snap.val() || {}; renderCategories(); });
+    db.ref('products').on('value', (snap) => { allProducts = Object.keys(snap.val() || {}).map(k => ({ id: k, ...snap.val()[k] })); filterAndRender(); });
+    document.getElementById('searchInput').addEventListener('input', () => filterAndRender());
 </script>
 </body>
 </html>
