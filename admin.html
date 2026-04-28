@@ -60,7 +60,7 @@
             m.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
             m.style.color = isError ? '#991b1b' : '#166534';
             m.style.display = 'block';
-            setTimeout(() => m.style.display = 'none', 3000);
+            setTimeout(() => m.style.display = 'none', 4000);
         }
     }
 </script>
@@ -72,7 +72,7 @@
     </div>
     <div id="globalMsg" class="msg"></div>
 
-    <!-- أزرار النسخ الاحتياطي الجديدة -->
+    <!-- أزرار النسخ الاحتياطي -->
     <div class="backup-buttons">
         <button class="btn-success" id="exportBtn">📤 تصدير كل البيانات (نسخة احتياطية)</button>
         <input type="file" id="importFile" accept=".json" style="display:none;">
@@ -103,7 +103,7 @@
         </div>
         <div class="products-table">
             <h3>📋 قائمة المنتجات</h3>
-            <table id="productsTable"><thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>عرض</th><th>الوصف</th><th>إجراءات</th></tr></thead><tbody id="productsTableBody"><tr><td colspan="7">✨ جاري التحميل...右侧杩</tbody>表
+            <table id="productsTable"><thead>人品<th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>عرض</th><th>الوصف</th><th>إجراءات</th> </thead><tbody id="productsTableBody"><tr><td colspan="7">✨ جاري التحميل...右侧杩</tbody>赶
         </div>
     </div>
 
@@ -134,7 +134,7 @@
         </div>
         <div class="categories-table">
             <h3>📋 قائمة الأقسام</h3>
-            <table id="categoriesTable"><thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></tr></thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...</td></tr></tbody>表
+            <table id="categoriesTable"><thead> <tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></tr> </thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...右侧杩</tbody>表
         </div>
     </div>
 
@@ -149,6 +149,7 @@
 </div>
 
 <script>
+    // ✅ تأكيد أن Firebase شغال قبل أي شيء
     const firebaseConfig = {
         apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
         authDomain: "el-dokkan-abc4e.firebaseapp.com",
@@ -174,12 +175,7 @@
             const productsSnap = await productsRef.once('value');
             const categoriesSnap = await categoriesRef.once('value');
             const subscribersSnap = await subscribersRef.once('value');
-            const backupData = {
-                products: productsSnap.val() || {},
-                categories: categoriesSnap.val() || {},
-                subscribers: subscribersSnap.val() || {},
-                exportedAt: new Date().toString()
-            };
+            const backupData = { products: productsSnap.val() || {}, categories: categoriesSnap.val() || {}, subscribers: subscribersSnap.val() || {}, exportedAt: new Date().toString() };
             const blob = new Blob([JSON.stringify(backupData, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -187,7 +183,7 @@
             a.download = `dokkan_backup_${Date.now()}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            showMessage(`✅ تم تصدير ${Object.keys(backupData.products).length} منتج و ${Object.keys(backupData.categories).length} قسم و ${Object.keys(backupData.subscribers).length} مشترك`);
+            showMessage(`✅ تم تصدير ${Object.keys(backupData.products).length} منتج و ${Object.keys(backupData.categories).length} قسم`);
         } catch(err) { showMessage("خطأ في التصدير: " + err.message, true); }
     };
 
@@ -202,7 +198,7 @@
                 if (backup.products) await productsRef.set(backup.products);
                 if (backup.categories) await categoriesRef.set(backup.categories);
                 if (backup.subscribers) await subscribersRef.set(backup.subscribers);
-                showMessage(`✅ تم استيراد البيانات بنجاح! تم تحديث ${Object.keys(backup.products||{}).length} منتج`);
+                showMessage(`✅ تم استيراد البيانات بنجاح!`);
                 setTimeout(() => location.reload(), 1500);
             } catch(err) { showMessage("ملف غير صالح: " + err.message, true); }
         };
@@ -256,7 +252,7 @@
         let html = '';
         cats.forEach(cat => {
             let productCount = Object.values(allProducts).filter(p => p.category === cat.id).length;
-            html += `<tr><td style="font-size:24px">${cat.icon}侧<td><strong>${cat.name}</strong>侧<td>${productCount} منتج侧<td><button class="edit-btn" onclick="editCategory('${cat.id}')">✏️</button> <button class="delete-btn" onclick="deleteCategory('${cat.id}')">🗑️</button>侧</td>`;
+            html += `<td><td style="font-size:24px">${cat.icon}</td><td><strong>${cat.name}</strong></td><td>${productCount} منتج</td><td><button class="edit-btn" onclick="editCategory('${cat.id}')">✏️</button> <button class="delete-btn" onclick="deleteCategory('${cat.id}')">🗑️</button></td>之后`;
         });
         tbody.innerHTML = html;
     }
@@ -298,7 +294,7 @@
         document.getElementById('editCategoryId').value = '';
         document.getElementById('catName').value = '';
         document.getElementById('catIcon').value = '📱';
-        document.getElementById('categoryFormTitle').innerText = '➕ إضافة قسم جديد';
+        document.getElementById('categoryFormTitle').innerHTML = '➕ إضافة قسم جديد';
     }
     document.getElementById('resetCategoryBtn').onclick = resetCategoryForm;
 
@@ -312,9 +308,13 @@
             let p = allProducts[key];
             let cat = allCategories[p.category] || { name: "بدون", icon: "❓" };
             html += `<tr>
-                <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50'">侧<td>${p.name}侧<td>${p.price} ج.م侧<td>${cat.icon} ${cat.name}侧
-                <td>${p.isOffer ? '🔥 عرض' : '❌'}侧<td>${(p.shortDesc || '').substring(0, 30)}侧
-                <td><button class="edit-btn" onclick="editProduct('${key}')">✏️</button> <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️</button>侧
+                <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50'"></td>
+                <td>${p.name}</td>
+                <td>${p.price} ج.م</td>
+                <td>${cat.icon} ${cat.name}</td>
+                <td>${p.isOffer ? '🔥 عرض' : '❌'}</td>
+                <td>${(p.shortDesc || '').substring(0, 30)}</td>
+                <td><button class="edit-btn" onclick="editProduct('${key}')">✏️</button> <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️</button></td>
             </tr>`;
         });
         tbody.innerHTML = html;
@@ -349,7 +349,7 @@
         document.getElementById('prodMainImage').value = p.mainImage || '';
         document.getElementById('prodExtraImages').value = (p.images || []).filter(i => i !== p.mainImage).join(',');
         document.getElementById('prodIsOffer').checked = p.isOffer || false;
-        document.getElementById('productFormTitle').innerText = '✏️ تعديل المنتج';
+        document.getElementById('productFormTitle').innerHTML = '✏️ تعديل المنتج';
     };
 
     window.deleteProduct = function(id) { if (confirm("حذف المنتج نهائياً؟")) productsRef.child(id).remove(); };
@@ -362,7 +362,7 @@
         document.getElementById('prodMainImage').value = '';
         document.getElementById('prodExtraImages').value = '';
         document.getElementById('prodIsOffer').checked = false;
-        document.getElementById('productFormTitle').innerText = '➕ إضافة منتج جديد';
+        document.getElementById('productFormTitle').innerHTML = '➕ إضافة منتج جديد';
     }
     document.getElementById('resetProductBtn').onclick = resetProductForm;
 
@@ -378,6 +378,15 @@
     productsRef.on('value', (snap) => { allProducts = snap.val() || {}; renderProductsTable(); renderCategoriesTable(); });
     loadCategories();
     loadSubscribers();
+
+    // ✅ اختبار بسيط للتأكد من أن الكتابة مسموحة
+    const testRef = db.ref('test_connection');
+    testRef.set({ time: new Date().toString() }).then(() => {
+        console.log("✅ Firebase connection successful, write is allowed.");
+    }).catch(err => {
+        console.error("❌ Firebase write error:", err);
+        showMessage("⚠️ تنبيه: Firebase لا يسمح بالكتابة. تأكد من قواعد الأمان (Rules)", true);
+    });
 </script>
 </body>
 </html>
