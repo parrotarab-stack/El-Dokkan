@@ -17,15 +17,23 @@
         .main-image { flex: 2; }
         .main-image img { width: 100%; border-radius: 20px; background: #f8fafc; padding: 20px; }
         .thumbnails { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        .thumbnails img { width: 100%; border-radius: 12px; cursor: pointer; border: 2px solid #e2e8f0; transition: 0.2s; }
-        .thumbnails img:hover { border-color: #f59e0b; }
+        .thumbnails img { width: 100%; border-radius: 12px; cursor: pointer; border: 2px solid #e2e8f0; }
         .price { font-size: 28px; font-weight: 800; color: #f59e0b; margin: 15px 0; }
         .specs { background: #f1f5f9; padding: 20px; border-radius: 20px; margin: 20px 0; }
         .spec-item { display: flex; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
         .spec-key { width: 120px; font-weight: bold; }
         .whatsapp-btn { background: #25D366; color: white; border: none; padding: 14px; font-size: 18px; font-weight: bold; border-radius: 60px; width: 100%; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .related-section { margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 25px; }
+        .related-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+        .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .related-card { background: white; border-radius: 16px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: 0.2s; }
+        .related-card:hover { transform: translateY(-3px); }
+        .related-img { width: 100%; height: 120px; object-fit: contain; background: #f8fafc; padding: 10px; }
+        .related-info { padding: 8px; text-align: center; }
+        .related-name { font-size: 13px; font-weight: 600; }
+        .related-price { font-size: 14px; font-weight: 800; color: #f59e0b; }
         .loading { text-align: center; padding: 50px; font-size: 18px; color: #f59e0b; }
-        @media (max-width: 700px) { .gallery { flex-direction: column; } .thumbnails { flex-direction: row; flex-wrap: wrap; } .thumbnails img { width: 70px; } }
+        @media (max-width: 700px) { .gallery { flex-direction: column; } .thumbnails { flex-direction: row; flex-wrap: wrap; } .thumbnails img { width: 70px; } .related-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -51,32 +59,59 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const PHONE = "201000621448";
-    const url = new URLSearchParams(window.location.search);
-    const id = url.get('id');
 
-    if (id) {
-        db.ref('products/' + id).once('value', (snap) => {
-            let p = snap.val();
-            if (!p) { document.getElementById('productContainer').innerHTML = '<div class="loading">❌ منتج غير موجود</div>'; return; }
-            let specsHtml = '<div class="specs">';
-            if (p.specs) for (let [k, v] of Object.entries(p.specs)) specsHtml += `<div class="spec-item"><div class="spec-key">${k}:</div><div>${v}</div></div>`;
-            specsHtml += '</div>';
-            let thumbs = (p.images && p.images.length) ? p.images : [p.mainImage];
-            let thumbsHtml = '';
-            thumbs.forEach(img => { thumbsHtml += `<img src="${img}" onclick="document.getElementById('mainImg').src='${img}'">`; });
-            document.getElementById('productContainer').innerHTML = `
-                <div class="gallery">
-                    <div class="main-image"><img id="mainImg" src="${p.mainImage}"></div>
-                    <div class="thumbnails">${thumbsHtml}</div>
-                </div>
-                <h1>${p.name}</h1>
-                <div class="price">${p.price} ج.م</div>
-                <div>${p.shortDesc || ''}</div>
-                ${specsHtml}
-                <button class="whatsapp-btn" onclick="window.open('https://wa.me/${PHONE}?text=${encodeURIComponent('أريد شراء: ' + p.name)}', '_blank')">📲 شراء عبر واتساب</button>
-            `;
-        });
-    }
+    const id = new URLSearchParams(window.location.search).get('id');
+    let allProducts = [];
+
+    // جلب كل المنتجات مرة واحدة عشان نرشح منها الـ Related
+    db.ref('products').once('value', (snap) => {
+        const data = snap.val() || {};
+        allProducts = Object.keys(data).map(k => ({ id: k, ...data[k] }));
+        // إذا كان id موجود، اعرض تفاصيل المنتج
+        if (id) {
+            db.ref('products/' + id).once('value', (snap) => {
+                let p = snap.val();
+                if (!p) { document.getElementById('productContainer').innerHTML = '<div class="loading">❌ منتج غير موجود</div>'; return; }
+                // عرض التفاصيل
+                let specsHtml = '<div class="specs">';
+                if (p.specs) for (let [k, v] of Object.entries(p.specs)) specsHtml += `<div class="spec-item"><div class="spec-key">${k}:</div><div>${v}</div></div>`;
+                specsHtml += '</div>';
+                let thumbs = (p.images && p.images.length) ? p.images : [p.mainImage];
+                let thumbsHtml = '';
+                thumbs.forEach(img => { thumbsHtml += `<img src="${img}" onclick="document.getElementById('mainImg').src='${img}'">`; });
+                // عرض المنتجات المقترحة (من نفس القسم باستثناء نفس المنتج)
+                let related = allProducts.filter(prod => prod.category === p.category && prod.id !== id).slice(0, 4);
+                let relatedHtml = '';
+                if (related.length > 0) {
+                    relatedHtml = `<div class="related-section"><div class="related-title">✨ قد يعجبك أيضاً</div><div class="related-grid">`;
+                    related.forEach(r => {
+                        relatedHtml += `
+                            <div class="related-card" onclick="window.location.href='product.html?id=${r.id}'">
+                                <img class="related-img" src="${r.mainImage}" onerror="this.src='https://placehold.co/300x300'">
+                                <div class="related-info">
+                                    <div class="related-name">${r.name}</div>
+                                    <div class="related-price">${r.price} ج.م</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    relatedHtml += `</div></div>`;
+                }
+                document.getElementById('productContainer').innerHTML = `
+                    <div class="gallery">
+                        <div class="main-image"><img id="mainImg" src="${p.mainImage}"></div>
+                        <div class="thumbnails">${thumbsHtml}</div>
+                    </div>
+                    <h1>${p.name}</h1>
+                    <div class="price">${p.price} ج.م</div>
+                    <div>${p.shortDesc || ''}</div>
+                    ${specsHtml}
+                    <button class="whatsapp-btn" onclick="window.open('https://wa.me/${PHONE}?text=${encodeURIComponent('أريد شراء: ' + p.name)}', '_blank')">📲 شراء عبر واتساب</button>
+                    ${relatedHtml}
+                `;
+            });
+        } else { document.getElementById('productContainer').innerHTML = '<div class="loading">❌ منتج غير موجود</div>'; }
+    });
 </script>
 </body>
 </html>
