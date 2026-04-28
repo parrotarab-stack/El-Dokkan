@@ -4,20 +4,21 @@
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - الدكان</title>
+    <title>لوحة التحكم الشاملة - الدكان</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
         body { background: #eef2ff; padding: 20px; }
-        .container { max-width: 1300px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         .header { background: #0f172a; color: white; padding: 15px 25px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; }
         .btn { background: #f59e0b; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; font-weight: bold; color: #0f172a; }
         .btn-secondary { background: #64748b; color: white; }
         .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
         .form-card { background: white; border-radius: 24px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 18px; }
         label { font-weight: bold; display: block; margin-bottom: 6px; color: #0f172a; }
-        input, select { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 12px; }
+        input, select, textarea { width: 100%; padding: 10px 15px; border: 1px solid #cbd5e1; border-radius: 12px; }
         .products-table, .categories-table { background: white; border-radius: 24px; padding: 20px; overflow-x: auto; margin-bottom: 25px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { text-align: right; padding: 12px; border-bottom: 1px solid #e2e8f0; }
@@ -26,16 +27,17 @@
         .small-img { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; }
         .logout-btn { background: #dc2626; color: white; border: none; padding: 8px 18px; border-radius: 30px; cursor: pointer; }
         .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #0f172a; border-right: 4px solid #f59e0b; padding-right: 12px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab-btn { background: #e2e8f0; border: none; padding: 10px 25px; border-radius: 40px; cursor: pointer; font-weight: bold; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .tab-btn { background: none; border: none; padding: 10px 25px; border-radius: 40px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
         .tab-btn.active { background: #f59e0b; color: white; }
-        .tab-content { display: none; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
-        .msg { background: #dcfce7; color: #166534; padding: 10px; border-radius: 12px; margin-bottom: 15px; display: none; }
-        .badge-checkbox { width: auto; margin-left: 10px; transform: scale(1.2); }
-        .flex-row { display: flex; align-items: center; gap: 10px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .msg { background: #dcfce7; color: #166534; padding: 12px; border-radius: 12px; margin-bottom: 15px; display: none; }
+        .flex-row { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .badge-checkbox { width: 25px; height: 25px; margin: 0; }
         .backup-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        @media (max-width: 700px) { th, td { font-size: 12px; padding: 6px; } }
+        @media (max-width: 700px) { th, td { font-size: 12px; padding: 6px; } .tabs { gap: 5px; } .tab-btn { padding: 6px 12px; font-size: 13px; } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -43,16 +45,16 @@
 <body>
 
 <script>
+    // ========== الحماية ==========
     const ADMIN_USER = "admin";
     const ADMIN_PASS = "dokkan2025";
     if (!sessionStorage.getItem('adminAuth')) {
-        let u = prompt("اسم المستخدم:");
-        let p = prompt("كلمة المرور:");
+        let u = prompt("🔐 اسم المستخدم:");
+        let p = prompt("🔑 كلمة المرور:");
         if (u === ADMIN_USER && p === ADMIN_PASS) sessionStorage.setItem('adminAuth', 'true');
-        else { alert("خطأ"); window.location.href = "index.html"; }
+        else { alert("❌ خطأ في البيانات"); window.location.href = "index.html"; }
     }
     function logout() { sessionStorage.clear(); location.reload(); }
-
     function showMessage(msg, isError = false) {
         let m = document.getElementById('globalMsg');
         if(m) {
@@ -67,8 +69,8 @@
 
 <div class="container">
     <div class="header">
-        <h2>⚙️ لوحة تحكم الدكان</h2>
-        <div><button onclick="logout()" class="logout-btn">🚪 خروج</button> <a href="index.html" style="color:white;">← المتجر</a></div>
+        <h2>⚙️ لوحة تحكم الدكان (النظام المتكامل)</h2>
+        <div><button onclick="logout()" class="logout-btn">🚪 تسجيل الخروج</button> <a href="index.html" style="color:white; margin-right:10px;">← عرض المتجر</a></div>
     </div>
     <div id="globalMsg" class="msg"></div>
 
@@ -80,34 +82,42 @@
         <button class="btn" id="refreshBtn">🔄 تحديث الصفحة</button>
     </div>
 
+    <!-- التبويبات -->
     <div class="tabs">
         <button class="tab-btn active" onclick="showTab('products')">📦 المنتجات</button>
-        <button class="tab-btn" onclick="showTab('categories')">🏷️ الأقسام</button>
+        <button class="tab-btn" onclick="showTab('categories')">🏷️ الأقسام (كاتوجوريات)</button>
         <button class="tab-btn" onclick="showTab('subscribers')">📧 المشتركين</button>
     </div>
 
-    <!-- تبويب المنتجات -->
+    <!-- ================= تبويب المنتجات ================= -->
     <div id="productsTab" class="tab-content active">
         <div class="form-card">
             <h3 id="productFormTitle">➕ إضافة منتج جديد</h3>
             <input type="hidden" id="editProductId">
             <div class="form-group"><label>اسم المنتج *</label><input type="text" id="prodName" placeholder="مثال: سماعة بلوتوث"></div>
             <div class="form-group"><label>السعر (جنيه) *</label><input type="number" id="prodPrice" placeholder="السعر"></div>
-            <div class="form-group"><label>القسم *</label><select id="prodCategory"></select></div>
-            <div class="form-group"><label>وصف مختصر</label><input type="text" id="prodShortDesc" placeholder="وصف سريع"></div>
+            <div class="form-group"><label>القسم *</label><select id="prodCategory"><option value="">-- اختر القسم --</option></select></div>
+            <div class="form-group"><label>وصف مختصر</label><textarea id="prodShortDesc" rows="2" placeholder="وصف سريع للمنتج"></textarea></div>
             <div class="form-group"><label>🔗 رابط الصورة الرئيسية *</label><input type="text" id="prodMainImage" placeholder="https://i.ibb.co/xxxxx.jpg"></div>
-            <div class="form-group"><label>🔗 روابط صور إضافية (فاصلة)</label><input type="text" id="prodExtraImages" placeholder="رابط1, رابط2"></div>
+            <div class="form-group"><label>🔗 روابط صور إضافية (فاصلة)</label><input type="text" id="prodExtraImages" placeholder="رابط1, رابط2, رابط3"></div>
             <div class="form-group flex-row"><label>🔥 عرض خاص (يظهر عليه علامة "عرض" في المتجر)</label><input type="checkbox" id="prodIsOffer" class="badge-checkbox"></div>
-            <button class="btn" id="saveProductBtn">💾 حفظ المنتج</button>
-            <button class="btn-secondary" id="resetProductBtn">🔄 إلغاء</button>
+            <div class="flex-row">
+                <button class="btn" id="saveProductBtn">💾 حفظ المنتج</button>
+                <button class="btn-secondary" id="resetProductBtn">🔄 إلغاء</button>
+            </div>
         </div>
         <div class="products-table">
             <h3>📋 قائمة المنتجات</h3>
-            <table id="productsTable"><thead>人品<th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>عرض</th><th>الوصف</th><th>إجراءات</th> </thead><tbody id="productsTableBody"><tr><td colspan="7">✨ جاري التحميل...右侧杩</tbody>赶
+            <div style="overflow-x: auto;">
+                <table id="productsTable">
+                    <thead><tr><th>الصورة</th><th>الاسم</th><th>السعر</th><th>القسم</th><th>عرض</th><th>الوصف</th><th>إجراءات</th></tr></thead>
+                    <tbody id="productsTableBody"><tr><td colspan="7" style="text-align:center;">✨ جاري التحميل...</td></tr></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- تبويب الأقسام -->
+    <!-- ================= تبويب الأقسام ================= -->
     <div id="categoriesTab" class="tab-content">
         <div class="form-card">
             <h3 id="categoryFormTitle">➕ إضافة قسم جديد</h3>
@@ -127,29 +137,37 @@
                     <option value="🚗">🚗 سيارات</option>
                     <option value="🎵">🎵 موسيقى</option>
                     <option value="✏️">✏️ أدوات</option>
+                    <option value="❤️">❤️ أخرى</option>
                 </select>
             </div>
-            <button class="btn" id="saveCategoryBtn">💾 حفظ القسم</button>
-            <button class="btn-secondary" id="resetCategoryBtn">🔄 إلغاء</button>
+            <div class="flex-row">
+                <button class="btn" id="saveCategoryBtn">💾 حفظ القسم</button>
+                <button class="btn-secondary" id="resetCategoryBtn">🔄 إلغاء</button>
+            </div>
         </div>
         <div class="categories-table">
             <h3>📋 قائمة الأقسام</h3>
-            <table id="categoriesTable"><thead> <tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></tr> </thead><tbody id="categoriesTableBody"><tr><td colspan="4">✨ جاري التحميل...右侧杩</tbody>表
+            <div style="overflow-x: auto;">
+                <table id="categoriesTable">
+                    <thead><tr><th>الأيقونة</th><th>اسم القسم</th><th>عدد المنتجات</th><th>إجراءات</th></tr></thead>
+                    <tbody id="categoriesTableBody"><tr><td colspan="4" style="text-align:center;">✨ جاري التحميل...</td></tr></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- تبويب المشتركين -->
+    <!-- ================= تبويب المشتركين ================= -->
     <div id="subscribersTab" class="tab-content">
         <div class="form-card">
             <h3>📧 المشتركين في النشرة البريدية</h3>
-            <button class="btn" id="copyEmailsBtn">📋 نسخ الإيميلات (لـ MailChimp/Gmail)</button>
-            <div id="subscribersList" style="margin-top: 20px; max-height: 400px; overflow-y: auto;"></div>
+            <button class="btn" id="copyEmailsBtn">📋 نسخ الإيميلات (لـ Gmail/MailChimp)</button>
+            <div id="subscribersList" style="margin-top: 20px; max-height: 400px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 16px;"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // ✅ تأكيد أن Firebase شغال قبل أي شيء
+    // ========== إعدادات Firebase ==========
     const firebaseConfig = {
         apiKey: "AIzaSyBRBIFK0awniSJgPNGsYdWP3Sf4TzHiMIo",
         authDomain: "el-dokkan-abc4e.firebaseapp.com",
@@ -172,10 +190,15 @@
     // ================= دوال النسخ الاحتياطي =================
     document.getElementById('exportBtn').onclick = async () => {
         try {
-            const productsSnap = await productsRef.once('value');
-            const categoriesSnap = await categoriesRef.once('value');
-            const subscribersSnap = await subscribersRef.once('value');
-            const backupData = { products: productsSnap.val() || {}, categories: categoriesSnap.val() || {}, subscribers: subscribersSnap.val() || {}, exportedAt: new Date().toString() };
+            const [productsSnap, categoriesSnap, subscribersSnap] = await Promise.all([
+                productsRef.once('value'), categoriesRef.once('value'), subscribersRef.once('value')
+            ]);
+            const backupData = {
+                products: productsSnap.val() || {},
+                categories: categoriesSnap.val() || {},
+                subscribers: subscribersSnap.val() || {},
+                exportedAt: new Date().toString()
+            };
             const blob = new Blob([JSON.stringify(backupData, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -183,11 +206,11 @@
             a.download = `dokkan_backup_${Date.now()}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            showMessage(`✅ تم تصدير ${Object.keys(backupData.products).length} منتج و ${Object.keys(backupData.categories).length} قسم`);
-        } catch(err) { showMessage("خطأ في التصدير: " + err.message, true); }
+            showMessage(`✅ تم تصدير ${Object.keys(backupData.products).length} منتج و ${Object.keys(backupData.categories).length} قسم و ${Object.keys(backupData.subscribers).length} مشترك`);
+        } catch(err) { showMessage("❌ خطأ في التصدير: " + err.message, true); }
     };
 
-    document.getElementById('importBtn').onclick = () => { document.getElementById('importFile').click(); };
+    document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
     document.getElementById('importFile').onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -200,7 +223,7 @@
                 if (backup.subscribers) await subscribersRef.set(backup.subscribers);
                 showMessage(`✅ تم استيراد البيانات بنجاح!`);
                 setTimeout(() => location.reload(), 1500);
-            } catch(err) { showMessage("ملف غير صالح: " + err.message, true); }
+            } catch(err) { showMessage("❌ ملف غير صالح: " + err.message, true); }
         };
         reader.readAsText(file);
     };
@@ -216,17 +239,22 @@
 
     function renderSubscribersList() {
         const container = document.getElementById('subscribersList');
-        const emails = Object.values(allSubscribers).map(s => s.email);
-        if (emails.length === 0) { container.innerHTML = '<div>⚠️ لا يوجد مشتركين حتى الآن</div>'; return; }
-        let html = '<ul style="list-style: none; padding: 0;">';
-        emails.forEach(email => { html += `<li style="padding: 8px; border-bottom: 1px solid #e2e8f0; direction: ltr; text-align: left;">📧 ${email}</li>`; });
-        html += '</ul>';
+        const subscribers = Object.values(allSubscribers);
+        if (subscribers.length === 0) { container.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ لا يوجد مشتركين حتى الآن</div>'; return; }
+        let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+        subscribers.forEach((sub, idx) => {
+            html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <span style="direction: ltr; text-align: left;">📧 ${sub.email}</span>
+                        <span style="font-size: 11px; color: #64748b;">${sub.subscribedAt || ''}</span>
+                    </div>`;
+        });
+        html += '</div>';
         container.innerHTML = html;
     }
 
     document.getElementById('copyEmailsBtn').onclick = () => {
         const emails = Object.values(allSubscribers).map(s => s.email);
-        if (emails.length === 0) { showMessage("لا يوجد إيميلات للنسخ", true); return; }
+        if (emails.length === 0) { showMessage("❌ لا يوجد إيميلات للنسخ", true); return; }
         navigator.clipboard.writeText(emails.join(', ')).then(() => showMessage(`✅ تم نسخ ${emails.length} إيميل`));
     };
 
@@ -234,11 +262,6 @@
     function loadCategories() {
         categoriesRef.on('value', (snap) => {
             allCategories = snap.val() || {};
-            if (Object.keys(allCategories).length === 0) {
-                const defaultCats = { electronics: { name: "إلكترونيات", icon: "📱" }, fashion: { name: "أزياء", icon: "👕" }, books: { name: "كتب", icon: "📚" }, home: { name: "منزل", icon: "🏠" } };
-                categoriesRef.set(defaultCats);
-                allCategories = defaultCats;
-            }
             renderCategoriesTable();
             updateCategorySelect();
         });
@@ -248,46 +271,60 @@
         const tbody = document.getElementById('categoriesTableBody');
         if (!tbody) return;
         const cats = Object.keys(allCategories).map(key => ({ id: key, ...allCategories[key] }));
-        if (cats.length === 0) { tbody.innerHTML = '<tr><td colspan="4">لا توجد أقسام右侧杩'; return; }
+        if (cats.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">📭 لا توجد أقسام. أضف أول قسم!</td></tr>'; return; }
         let html = '';
         cats.forEach(cat => {
             let productCount = Object.values(allProducts).filter(p => p.category === cat.id).length;
-            html += `<td><td style="font-size:24px">${cat.icon}</td><td><strong>${cat.name}</strong></td><td>${productCount} منتج</td><td><button class="edit-btn" onclick="editCategory('${cat.id}')">✏️</button> <button class="delete-btn" onclick="deleteCategory('${cat.id}')">🗑️</button></td>之后`;
+            html += `<tr>
+                        <td style="font-size:24px">${cat.icon}</td>
+                        <td><strong>${escapeHtml(cat.name)}</strong></td>
+                        <td>${productCount} منتج</td>
+                        <td>
+                            <button class="edit-btn" onclick="editCategory('${cat.id}')">✏️ تعديل</button>
+                            <button class="delete-btn" onclick="deleteCategory('${cat.id}')">🗑️ حذف</button>
+                        </td>
+                    </tr>`;
         });
         tbody.innerHTML = html;
     }
 
     function updateCategorySelect() {
         const select = document.getElementById('prodCategory');
-        if(select) {
-            select.innerHTML = '<option value="">-- اختر القسم --</option>';
-            Object.keys(allCategories).forEach(key => { select.innerHTML += `<option value="${key}">${allCategories[key].icon} ${allCategories[key].name}</option>`; });
-        }
+        if(!select) return;
+        select.innerHTML = '<option value="">-- اختر القسم --</option>';
+        Object.keys(allCategories).forEach(key => {
+            select.innerHTML += `<option value="${key}">${allCategories[key].icon} ${escapeHtml(allCategories[key].name)}</option>`;
+        });
     }
 
-    document.getElementById('saveCategoryBtn').onclick = function() {
+    document.getElementById('saveCategoryBtn').onclick = () => {
         let id = document.getElementById('editCategoryId').value;
         let name = document.getElementById('catName').value.trim();
         let icon = document.getElementById('catIcon').value;
-        if (!name) { showMessage("اكتب اسم القسم", true); return; }
+        if (!name) { showMessage("❌ اكتب اسم القسم", true); return; }
         let data = { name, icon };
-        if (id) { categoriesRef.child(id).update(data).then(() => { showMessage("✅ تم تعديل القسم"); resetCategoryForm(); }); } 
-        else { categoriesRef.push(data).then(() => { showMessage("✅ تم إضافة القسم"); resetCategoryForm(); }); }
+        if (id) {
+            categoriesRef.child(id).update(data).then(() => { showMessage("✅ تم تعديل القسم"); resetCategoryForm(); });
+        } else {
+            categoriesRef.push(data).then(() => { showMessage("✅ تم إضافة القسم"); resetCategoryForm(); });
+        }
     };
 
-    window.editCategory = function(id) {
+    window.editCategory = (id) => {
         let cat = allCategories[id];
         if (!cat) return;
         document.getElementById('editCategoryId').value = id;
         document.getElementById('catName').value = cat.name;
         document.getElementById('catIcon').value = cat.icon;
-        document.getElementById('categoryFormTitle').innerText = '✏️ تعديل القسم';
+        document.getElementById('categoryFormTitle').innerHTML = '✏️ تعديل القسم';
     };
 
-    window.deleteCategory = function(id) {
+    window.deleteCategory = (id) => {
         let count = Object.values(allProducts).filter(p => p.category === id).length;
-        if (count > 0) { showMessage(`لا يمكن حذف القسم وفيه ${count} منتج`, true); return; }
-        if (confirm("حذف القسم نهائياً؟")) categoriesRef.child(id).remove();
+        if (count > 0) { showMessage(`❌ لا يمكن حذف القسم وفيه ${count} منتج. انقل المنتجات أولاً`, true); return; }
+        if (confirm("⚠️ هل أنت متأكد من حذف هذا القسم نهائياً؟")) {
+            categoriesRef.child(id).remove().then(() => showMessage("✅ تم حذف القسم"));
+        }
     };
 
     function resetCategoryForm() {
@@ -302,25 +339,28 @@
     function renderProductsTable() {
         const tbody = document.getElementById('productsTableBody');
         const keys = Object.keys(allProducts);
-        if (keys.length === 0) { tbody.innerHTML = '<tr><td colspan="7">لا توجد منتجات右侧杩'; return; }
+        if (keys.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">📭 لا توجد منتجات. أضف منتجك الأول!</td></tr>'; return; }
         let html = '';
         keys.forEach(key => {
             let p = allProducts[key];
-            let cat = allCategories[p.category] || { name: "بدون", icon: "❓" };
+            let cat = allCategories[p.category] || { name: "بدون قسم", icon: "❓" };
             html += `<tr>
-                <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50'"></td>
-                <td>${p.name}</td>
-                <td>${p.price} ج.م</td>
-                <td>${cat.icon} ${cat.name}</td>
-                <td>${p.isOffer ? '🔥 عرض' : '❌'}</td>
-                <td>${(p.shortDesc || '').substring(0, 30)}</td>
-                <td><button class="edit-btn" onclick="editProduct('${key}')">✏️</button> <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️</button></td>
-            </tr>`;
+                        <td><img class="small-img" src="${p.mainImage || ''}" onerror="this.src='https://placehold.co/50x50'"></td>
+                        <td>${escapeHtml(p.name)}</td>
+                        <td>${p.price} ج.م</td>
+                        <td>${cat.icon} ${escapeHtml(cat.name)}</td>
+                        <td>${p.isOffer ? '🔥 عرض خاص' : '❌'}</td>
+                        <td>${escapeHtml((p.shortDesc || '').substring(0, 40))}</td>
+                        <td>
+                            <button class="edit-btn" onclick="editProduct('${key}')">✏️ تعديل</button>
+                            <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️ حذف</button>
+                        </td>
+                    </tr>`;
         });
         tbody.innerHTML = html;
     }
 
-    document.getElementById('saveProductBtn').onclick = function() {
+    document.getElementById('saveProductBtn').onclick = () => {
         let id = document.getElementById('editProductId').value;
         let name = document.getElementById('prodName').value.trim();
         let price = document.getElementById('prodPrice').value.trim();
@@ -331,14 +371,17 @@
         let isOffer = document.getElementById('prodIsOffer').checked;
         let images = extraRaw ? extraRaw.split(',').map(s => s.trim()) : [];
         if (mainImage && !images.includes(mainImage)) images.unshift(mainImage);
-        if (!name || !price || !mainImage) { showMessage("املأ الاسم والسعر والصورة", true); return; }
-        if (!category) { showMessage("اختر القسم", true); return; }
+        if (!name || !price || !mainImage) { showMessage("❌ املأ الاسم والسعر والصورة الرئيسية", true); return; }
+        if (!category) { showMessage("❌ اختر القسم", true); return; }
         let data = { name, price, category, shortDesc, mainImage, images, isOffer };
-        if (id) { productsRef.child(id).update(data).then(() => { showMessage("✅ تم تعديل المنتج"); resetProductForm(); }); } 
-        else { productsRef.push(data).then(() => { showMessage("✅ تمت إضافة المنتج"); resetProductForm(); }); }
+        if (id) {
+            productsRef.child(id).update(data).then(() => { showMessage("✅ تم تعديل المنتج"); resetProductForm(); });
+        } else {
+            productsRef.push(data).then(() => { showMessage("✅ تمت إضافة المنتج"); resetProductForm(); });
+        }
     };
 
-    window.editProduct = function(id) {
+    window.editProduct = (id) => {
         let p = allProducts[id];
         if (!p) return;
         document.getElementById('editProductId').value = id;
@@ -352,7 +395,11 @@
         document.getElementById('productFormTitle').innerHTML = '✏️ تعديل المنتج';
     };
 
-    window.deleteProduct = function(id) { if (confirm("حذف المنتج نهائياً؟")) productsRef.child(id).remove(); };
+    window.deleteProduct = (id) => {
+        if (confirm("⚠️ هل أنت متأكد من حذف هذا المنتج نهائياً؟")) {
+            productsRef.child(id).remove().then(() => showMessage("✅ تم حذف المنتج"));
+        }
+    };
 
     function resetProductForm() {
         document.getElementById('editProductId').value = '';
@@ -366,27 +413,36 @@
     }
     document.getElementById('resetProductBtn').onclick = resetProductForm;
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
     // ================= عرض التبويبات =================
     window.showTab = function(tab) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if (tab === 'products') { document.getElementById('productsTab').classList.add('active'); document.querySelector('.tab-btn:first-child').classList.add('active'); }
-        else if (tab === 'categories') { document.getElementById('categoriesTab').classList.add('active'); document.querySelectorAll('.tab-btn')[1].classList.add('active'); }
-        else { document.getElementById('subscribersTab').classList.add('active'); document.querySelectorAll('.tab-btn')[2].classList.add('active'); }
+        if (tab === 'products') {
+            document.getElementById('productsTab').classList.add('active');
+            document.querySelector('.tab-btn:first-child').classList.add('active');
+        } else if (tab === 'categories') {
+            document.getElementById('categoriesTab').classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        } else {
+            document.getElementById('subscribersTab').classList.add('active');
+            document.querySelectorAll('.tab-btn')[2].classList.add('active');
+        }
     };
 
+    // ========== تحميل البيانات في الوقت الفعلي ==========
     productsRef.on('value', (snap) => { allProducts = snap.val() || {}; renderProductsTable(); renderCategoriesTable(); });
     loadCategories();
     loadSubscribers();
-
-    // ✅ اختبار بسيط للتأكد من أن الكتابة مسموحة
-    const testRef = db.ref('test_connection');
-    testRef.set({ time: new Date().toString() }).then(() => {
-        console.log("✅ Firebase connection successful, write is allowed.");
-    }).catch(err => {
-        console.error("❌ Firebase write error:", err);
-        showMessage("⚠️ تنبيه: Firebase لا يسمح بالكتابة. تأكد من قواعد الأمان (Rules)", true);
-    });
 </script>
 </body>
 </html>
