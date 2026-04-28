@@ -9,27 +9,35 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
         body { background: #f5f7fb; }
-        .header { background: #0f172a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 100; }
+        .header { background: #0f172a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .logo { font-size: 24px; font-weight: 800; }
         .logo span { color: #f59e0b; }
         .admin-btn { background: #f59e0b; color: #0f172a; padding: 8px 20px; border-radius: 40px; text-decoration: none; font-weight: 600; }
         .search-box { padding: 15px 20px; max-width: 600px; margin: 10px auto; }
         .search-box input { width: 100%; padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 50px; font-size: 16px; outline: none; }
-        .search-box input:focus { border-color: #f59e0b; }
         .categories-bar { background: white; padding: 12px 20px; display: flex; gap: 20px; overflow-x: auto; border-bottom: 1px solid #e2e8f0; }
-        .cat-link { text-decoration: none; color: #475569; font-weight: 600; white-space: nowrap; cursor: pointer; padding: 4px 0; border-bottom: 2px solid transparent; }
-        .cat-link.active { color: #f59e0b; border-bottom-color: #f59e0b; }
+        .cat-link { cursor: pointer; padding: 4px 0; border-bottom: 2px solid transparent; white-space: nowrap; }
+        .cat-link.active { color: #f59e0b; border-bottom-color: #f59e0b; font-weight: 600; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; }
-        .product-card { background: white; border-radius: 16px; overflow: hidden; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .product-card { background: white; border-radius: 16px; overflow: hidden; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
         .product-img { width: 100%; height: 170px; object-fit: contain; background: #f8fafc; padding: 15px; }
         .product-info { padding: 12px; }
-        .product-title { font-weight: 700; margin-bottom: 5px; }
-        .product-price { font-size: 18px; font-weight: 800; color: #f59e0b; }
-        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25D366; color: white; padding: 10px 18px; border-radius: 50px; display: flex; gap: 8px; text-decoration: none; font-weight: bold; z-index: 99; }
+        .product-title { font-weight: 700; }
+        .product-price { font-size: 18px; font-weight: 800; color: #f59e0b; margin-top: 5px; }
+        .offer-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; padding: 4px 10px; border-radius: 30px; font-size: 12px; font-weight: bold; z-index: 1; }
+        /* Newsletter Section */
+        .newsletter { background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 40px 20px; text-align: center; margin: 20px 0; }
+        .newsletter h3 { font-size: 24px; margin-bottom: 10px; }
+        .newsletter p { margin-bottom: 20px; opacity: 0.8; }
+        .newsletter-form { display: flex; max-width: 500px; margin: 0 auto; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .newsletter-form input { flex: 2; padding: 12px 15px; border: none; border-radius: 50px; outline: none; direction: ltr; text-align: left; }
+        .newsletter-form button { background: #f59e0b; color: #0f172a; border: none; padding: 12px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; }
+        .newsletter-message { margin-top: 15px; font-size: 14px; display: none; }
         footer { text-align: center; padding: 25px; background: #0f172a; color: #94a3b8; margin-top: 30px; }
-        .empty-state { text-align: center; padding: 60px; color: #64748b; grid-column: 1 / -1; }
-        @media (max-width: 640px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; } .product-img { height: 130px; } }
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background: #25D366; color: white; padding: 10px 18px; border-radius: 50px; text-decoration: none; display: flex; gap: 8px; font-weight: bold; z-index: 99; }
+        .empty-state { text-align: center; padding: 60px; color: #64748b; grid-column: 1/-1; }
+        @media (max-width: 640px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; } .product-img { height: 130px; } .newsletter-form { flex-direction: column; } }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -44,6 +52,17 @@
 <div class="categories-bar" id="categoriesContainer">✨ جاري تحميل الأقسام...</div>
 <div class="search-box"><input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..."></div>
 <div class="products-grid" id="productsContainer">✨ جاري تحميل المنتجات...</div>
+
+<!-- ✅ قسم النشرة البريدية (جديد) -->
+<div class="newsletter">
+    <h3>📧 اشترك في النشرة البريدية</h3>
+    <p>احصل على أحدث العروض والمنتجات أول بأول</p>
+    <div class="newsletter-form">
+        <input type="email" id="subscriberEmail" placeholder="أدخل بريدك الإلكتروني" required>
+        <button id="subscribeBtn">اشتراك</button>
+    </div>
+    <div id="newsletterMsg" class="newsletter-message"></div>
+</div>
 
 <footer><p>الدكان | الدفع عند الاستلام | واتساب: 01000621448</p></footer>
 <a href="https://wa.me/201000621448" class="whatsapp-float">📱 واتساب</a>
@@ -65,31 +84,34 @@
     let allCategories = {};
     let currentCategory = 'all';
 
+    // دالة عرض الأقسام
     function renderCategories() {
         const container = document.getElementById('categoriesContainer');
-        let catsArray = Object.keys(allCategories).map(k => ({ id: k, ...allCategories[k] }));
-        if (catsArray.length === 0) { container.innerHTML = '<div>لا توجد أقسام</div>'; return; }
+        let cats = Object.keys(allCategories).map(k => ({ id: k, ...allCategories[k] }));
+        if (cats.length === 0) { container.innerHTML = '<div>لا توجد أقسام</div>'; return; }
         let html = `<div class="cat-link ${currentCategory === 'all' ? 'active' : ''}" data-cat="all">🔥 الكل</div>`;
-        catsArray.forEach(c => { html += `<div class="cat-link ${currentCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${c.icon} ${c.name}</div>`; });
+        cats.forEach(c => { html += `<div class="cat-link ${currentCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${c.icon} ${c.name}</div>`; });
         container.innerHTML = html;
         document.querySelectorAll('.cat-link').forEach(el => {
             el.addEventListener('click', () => {
-                currentCategory = el.getAttribute('data-cat');
+                currentCategory = el.dataset.cat;
                 renderCategories();
                 filterAndRender();
             });
         });
     }
 
+    // دالة عرض المنتجات مع إظهار علامة "عرض" إذا كان isOffer === true
     function filterAndRender() {
         let filtered = [...allProducts];
         if (currentCategory !== 'all') filtered = filtered.filter(p => p.category === currentCategory);
-        let search = document.getElementById('searchInput').value.toLowerCase();
-        if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || (p.shortDesc && p.shortDesc.toLowerCase().includes(search)));
+        let searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        if (searchTerm) filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm) || (p.shortDesc && p.shortDesc.toLowerCase().includes(searchTerm)));
         const container = document.getElementById('productsContainer');
         if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">📭 لا توجد منتجات</div>'; return; }
         container.innerHTML = filtered.map(p => `
             <div class="product-card" onclick="window.location.href='product.html?id=${p.id}'">
+                ${p.isOffer ? '<div class="offer-badge">🔥 عرض خاص</div>' : ''}
                 <img class="product-img" src="${p.mainImage}" loading="lazy" onerror="this.src='https://placehold.co/300x300'">
                 <div class="product-info">
                     <div class="product-title">${p.name}</div>
@@ -99,6 +121,32 @@
         `).join('');
     }
 
+    // ========== النشرة البريدية (حفظ الإيميل في Firebase) ==========
+    document.getElementById('subscribeBtn').onclick = () => {
+        let email = document.getElementById('subscriberEmail').value.trim();
+        let msgDiv = document.getElementById('newsletterMsg');
+        if (!email || !email.includes('@')) {
+            msgDiv.style.color = "#fecaca";
+            msgDiv.innerText = "❌ من فضلك أدخل بريد إلكتروني صحيح";
+            msgDiv.style.display = 'block';
+            setTimeout(() => msgDiv.style.display = 'none', 3000);
+            return;
+        }
+        const subscribersRef = db.ref('subscribers');
+        subscribersRef.push({ email: email, subscribedAt: new Date().toString() }).then(() => {
+            msgDiv.style.color = "#dcfce7";
+            msgDiv.innerText = "✅ تم الاشتراك بنجاح! شكراً لك";
+            msgDiv.style.display = 'block';
+            document.getElementById('subscriberEmail').value = '';
+            setTimeout(() => msgDiv.style.display = 'none', 3000);
+        }).catch(err => {
+            msgDiv.style.color = "#fecaca";
+            msgDiv.innerText = "❌ خطأ: " + err.message;
+            msgDiv.style.display = 'block';
+        });
+    };
+
+    // ========== تحميل البيانات من Firebase ==========
     db.ref('categories').on('value', (snap) => { allCategories = snap.val() || {}; renderCategories(); });
     db.ref('products').on('value', (snap) => { allProducts = Object.keys(snap.val() || {}).map(k => ({ id: k, ...snap.val()[k] })); filterAndRender(); });
     document.getElementById('searchInput').addEventListener('input', () => filterAndRender());
